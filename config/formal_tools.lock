@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "suite": "oss-cad-suite-linux-x64-20260905",
+  "synthesis_lock": "config/synthesis.lock",
+  "versions": {
+    "sby": "SBY v0.68",
+    "yices-smt2": "Yices 2.7.0"
+  },
+  "sha256": {
+    "share/manifest.json": "dcfd044ae9f826c5c32b83d2112e77a2f8389ecf1fe1789b3de85e7831ffe28e",
+    "bin/sby": "ef208a3bf8350076de9b09663cdb820a62a34ab2fd481784a72c7cf60c7cb02d",
+    "libexec/sby": "4ccb17531d9ed1cabb86eb63e297a3c82fbd8e53df717e1b3c7508723b37bcb8",
+    "bin/yosys-smtbmc": "1eaa8457ba53f48df9c7023f2eac3a40022ddb005401a6214f25b7be364b6b08",
+    "libexec/yosys-smtbmc": "0192f63913bdff347912602315504d5a6ed9e3ff8fbf0dbcdc7c33e5b66681d9",
+    "bin/yices-smt2": "85b8ebb0351554b3e237f6a3f503b512f4d167f34d0380a7a3abd287da674bb5",
+    "libexec/yices-smt2": "5d2038cc97aa79c2055f0fde1bb55af2855ec0f53b92071936c22b33df17b15f",
+    "bin/tabbypy3": "76e89d5ea37ccf68a852116ed48c364e28cc69e193b769faa431bec7f7883684",
+    "libexec/python3.11": "851b1c9d27609b8ff34a9ca77d28d52a45be6fd1508dd8124ba5fdefde6b5dd9",
+    "lib/ld-linux-x86-64.so.2": "c5e80a563850d6ab5c2f2482e4202d9c1b71fbf44854b8c399e63527202c64e1",
+    "share/yosys/python3/sby_autotune.py": "11d3f849bf7b75ce9fab41e36e3f42cfbac2ef50932dae2e620af74d89b77948",
+    "share/yosys/python3/sby_cmdline.py": "78cbf93b798372a0140c149a671a85d1756abfe9d09c237fbb9a753e235576c3",
+    "share/yosys/python3/sby_core.py": "ed0f9c8eeb855875c26138b4608d999049c78d3e100b08ed3a4510d9348a2ff1",
+    "share/yosys/python3/sby_design.py": "60b59491dadbbcd5a979acd8d68b2160f91e7a94a55dcac8a783a3d379a2978b",
+    "share/yosys/python3/sby_engine_abc.py": "84019808db4668425a42d8600b2e7ab05cef0d3539e67217d2bbd1414d4513e5",
+    "share/yosys/python3/sby_engine_aiger.py": "60c9ddfa7e97e9824aa60e5c38cc16f270618c7377a256c81a140a7fcabf59a3",
+    "share/yosys/python3/sby_engine_btor.py": "9d072b8bdfc85d5c828efa583e036c4e9c5b679a4d38d01c72a5e9f1b8f0528d",
+    "share/yosys/python3/sby_engine_itp.py": "bd6d71a02f23223a76f70bc35dd8bff6f50cd32ceddb5b9fc61f51d3c57869a9",
+    "share/yosys/python3/sby_engine_smtbmc.py": "e6b27b7806528431dc980bd12aa913e92c65e92f2895626a45cf801b12f30a89",
+    "share/yosys/python3/sby_jobserver.py": "66ff7b8bac7b5a7d0d43483a1290bd42f6ce92cfd2db9b7283f983ec1d18d79d",
+    "share/yosys/python3/sby_mode_bmc.py": "0304d57d681290f1b9b151205c1d9c39b3a1f3a871f8ae4173938fad066da6e8",
+    "share/yosys/python3/sby_mode_cover.py": "247b753436a870afa3d24906b897f8a26e3b98c271ac45476b95cc8f2c899218",
+    "share/yosys/python3/sby_mode_live.py": "8e920dcde0f8b4464386c54e45b7e0ded21765b039cfe6c6afe2f61c78bcdcad",
+    "share/yosys/python3/sby_mode_prove.py": "931967c2de52fa5e3f63a92203038224b5255cf908348ed659d9d0dd378ddf4e",
+    "share/yosys/python3/sby_sim.py": "2bf848ba341071adddedb882fe5de3b5caba53b404c1fd1186ecf32d175f9d8e",
+    "share/yosys/python3/sby_status.py": "6505c8548fcca855a8de9ba5d0617ab205ba12a8b30be9ac5ddb915bf43158fc",
+    "share/yosys/python3/smtio.py": "3ab59d7fa9808e8f529870868dca27477b5d61f727508c94310e4c19cb59f75e",
+    "share/yosys/python3/ywio.py": "537d38a17af01d67c4ff4c5e6fb88f01b4dad7d0f9f6cb5cd13e2429036d5cfb"
+  },
+  "time_sha256": "7310b9b4c51a8f4d26c1af0da250f03a49ec8a8141033123e79196ad18f6c81b"
+}

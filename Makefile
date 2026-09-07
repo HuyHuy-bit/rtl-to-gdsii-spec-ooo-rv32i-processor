@@ -11,9 +11,13 @@ OSS_CAD_SUITE ?= $(HOME)/tools/oss-cad-suite-20260905/oss-cad-suite
 .PHONY: act4-tools act4-core-check
 .PHONY: sail-log-check sail-differential-check
 .PHONY: architectural-slice-check architectural-slice-evidence-check architectural-slice-checker-test
+.PHONY: assert-portability
 
 doctor:
 	@python3 tools/doctor.py --lock config/toolchain.lock --profile "$(PROFILE)"
+
+assert-portability:
+	@python3 tools/run_assert_portability.py --suite "$(OSS_CAD_SUITE)"
 
 architectural-slice-check:
 	@python3 tools/run_architectural_slice.py

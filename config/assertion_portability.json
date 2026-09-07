@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "profile": "clocked_immediate_assertions",
+  "sources": [
+    "verif/assert/portability/assert_portability.sv",
+    "verif/assert/portability/portability_tb.sv",
+    "verif/assert/portability/portability_formal.sv"
+  ],
+  "simulation_cycles": 24,
+  "formal_engine": "smtbmc yices",
+  "formal_depth": 12,
+  "timeout_seconds": 120,
+  "formal_assumptions": ["Reset is asserted at the first sampled edge; later reset, advance, and data are unconstrained."],
+  "required_covers": ["reset_reentry", "stalled", "sample_change"],
+  "support_matrix": [
+    {"construct": "clocked immediate assert with else $fatal and Boolean/indexed bit predicates", "assertion": "no_duplicate", "mutation": 1, "marker": "PORT_DUPLICATE", "fault": "both acceptance bits high"},
+    {"construct": "$countones with signed int cast in an immediate assertion", "assertion": "population", "mutation": 2, "marker": "PORT_COUNT", "fault": "reported population differs"},
+    {"construct": "procedural reset guard around an immediate assertion", "assertion": "population", "mutation": 3, "marker": "PORT_COUNT", "fault": "guard removed during reset reentry"},
+    {"construct": "pre-update edge sampling with explicit history registers", "assertion": "sampled", "mutation": 4, "marker": "PORT_SAMPLE", "fault": "current input substituted for previous sampled input"},
+    {"construct": "nested procedural guard and prior-cycle hold predicate", "assertion": "held", "mutation": 5, "marker": "PORT_HOLD", "fault": "state advances while stalled"},
+    {"construct": "dynamic packed-vector bit select in an immediate assertion", "assertion": "indexed", "mutation": 6, "marker": "PORT_INDEX", "fault": "wrong one-hot bit selected"}
+  ],
+  "tools": ["Verilator", "Yosys Slang frontend", "SymbiYosys", "Yices"],
+  "expected_results": {"positive_simulation": "PASS", "positive_formal": "PASS by induction", "mutants_simulation": "expected assertion failure", "mutants_formal": "FAIL with expected assertion and counterexample", "covers": "all reached"},
+  "shared_synthesis_guard": "Yosys formal reads use --no-synthesis-define so `ifndef SYNTHESIS assertions remain enabled; ordinary synthesis may remove them.",
+  "tool_specific_constructs": {"formal_harness_only": ["unconstrained top-level input ports", "assume", "cover", "initial state constraint"], "not_qualified_for_shared_use": ["concurrent SVA", "$past", "$stable", "disable iff", "four-state X/Z semantics", "undriven variables with anyseq attributes under read_slang"]},
+  "claim": "Assertion syntax and sampling portability only; no processor ownership proof or complete formal-readiness gate."
+}
