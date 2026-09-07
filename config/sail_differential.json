@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "profile": "tier_a_shared_platform_differential",
+  "profile": "architectural_slice_shared_platform_differential",
   "seeds": [
     1,
     42,
@@ -17,7 +17,7 @@
     "Sail 0.10 has different fixed-CSR and machine-counter policies: writes to misa/mie/mip and machine-counter accesses remain in the dedicated RTL/interpreter tests.",
     "The timer tick interval exceeds each run so Sail does not introduce CLINT pending interrupts into the interrupt-disabled profile.",
     "Transport fault injection remains in single-lane-check; this differential exercises architectural PMA faults.",
-    "This receipt does not accept Tier A."
+    "This receipt does not accept Architectural Slice."
   ],
   "sail_binary_sha256": "46a321045d6ac14190c05c68504b8aaf9dd80756e44e82e37f5aff5543ab4a34"
 }

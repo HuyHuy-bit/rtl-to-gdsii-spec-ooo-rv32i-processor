@@ -206,7 +206,7 @@ def main():
                                 'verif/lockstep/comparator.py','verif/lockstep/generated/commit_event.py','verif/protocol/generated/memory_protocol.py']
     receipt.write_text(json.dumps({'schema':1,'profile':config['profile'],'inputs_sha256':{p:digest(ROOT/p) for p in paths},
                                   'cases':results,'spike_revision':revision,'spike_events':checked,
-                                  'mutations_detected':mutation_results,'synthesis':synthesis,'tier_a_accepted':False},indent=2)+'\n')
+                                  'mutations_detected':mutation_results,'synthesis':synthesis,'architectural_slice_accepted':False},indent=2)+'\n')
 
 
 if __name__ == '__main__':

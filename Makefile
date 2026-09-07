@@ -10,9 +10,19 @@ OSS_CAD_SUITE ?= $(HOME)/tools/oss-cad-suite-20260905/oss-cad-suite
 .PHONY: single-lane-check single-lane-synth-check
 .PHONY: act4-tools act4-core-check
 .PHONY: sail-log-check sail-differential-check
+.PHONY: architectural-slice-check architectural-slice-evidence-check architectural-slice-checker-test
 
 doctor:
 	@python3 tools/doctor.py --lock config/toolchain.lock --profile "$(PROFILE)"
+
+architectural-slice-check:
+	@python3 tools/run_architectural_slice.py
+
+architectural-slice-evidence-check:
+	@python3 tools/check_architectural_slice.py
+
+architectural-slice-checker-test:
+	@python3 -m unittest -v tests/test_architectural_slice.py
 
 platform-generate:
 	@python3 tools/gen_platform.py --input config/platform.yaml --write
@@ -89,7 +99,7 @@ sail-differential-check:
 single-lane-synth-check:
 	@python3 tools/run_single_lane.py --synth --mutations --suite "$(OSS_CAD_SUITE)"
 
-check-fast: platform-check event-check memory-check lockstep-check act4-check prf-check a1-probe-check single-lane-check sail-log-check
+check-fast: platform-check event-check memory-check lockstep-check act4-check prf-check a1-probe-check single-lane-check sail-log-check architectural-slice-checker-test
 	@python3 tools/check_s0.py
 	@git diff --check
 

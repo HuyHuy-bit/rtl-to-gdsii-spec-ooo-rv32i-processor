@@ -131,7 +131,7 @@ def main():
     receipt.write_text(json.dumps({**fingerprint, 'schema': 1, 'profile': selection['profile'], 'runs': results,
         'selected_tests': len(tests), 'deferred_tests': selection['deferred_tests'],
         'unexpected_skips': 0, 'negative_checks': ['corrupt_signature', 'fail', 'timeout'],
-        'tier_a_accepted': False}, indent=2)+'\n')
+        'architectural_slice_accepted': False}, indent=2)+'\n')
     print(f'ACT4 core: PASS ({len(tests)} tests, {len(results)} runs, zero unexpected skips, 3 negative checks)', flush=True)
     print(f'Receipt: {receipt.relative_to(ROOT)}')
 

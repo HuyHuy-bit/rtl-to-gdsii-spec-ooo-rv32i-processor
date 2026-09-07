@@ -154,7 +154,7 @@ def main():
     if any(digest(ROOT/p) != h for p,h in inputs.items()): raise ValueError('inputs changed during differential run')
     receipt.write_text(json.dumps({**fingerprint,'schema':1,'profile':settings['profile'],'runs':results,
         'core_binary_sha256':digest(binary),'sail_override':settings['sail_override'],
-        'mutations_detected':mutations,'limitations':settings['limitations'],'tier_a_accepted':False},indent=2)+'\n')
+        'mutations_detected':mutations,'limitations':settings['limitations'],'architectural_slice_accepted':False},indent=2)+'\n')
     print(f'Receipt: {receipt.relative_to(ROOT)}')
 
 

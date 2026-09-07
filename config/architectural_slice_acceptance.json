@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "profile": "architectural_slice_serialized_bram",
+  "claim_class": "simulation_and_generic_synthesis",
+  "commands": [
+    ["make", "--no-print-directory", "nightly"],
+    ["make", "--no-print-directory", "a1-check"],
+    ["make", "--no-print-directory", "single-lane-synth-check"],
+    ["make", "--no-print-directory", "act4-core-check"],
+    ["make", "--no-print-directory", "sail-differential-check"]
+  ],
+  "command_timeout_seconds": 3600,
+  "seeds": [1, 42, 20260906],
+  "selected_act4_tests": 19,
+  "unexpected_skips_allowed": 0,
+  "minimum_spike_events": 1056,
+  "minimum_sail_events_per_run": 1200,
+  "coverage": {
+    "trap_causes": [0, 1, 2, 3, 4, 5, 6, 7, 11],
+    "branch_forms": [0, 1, 4, 5, 6, 7],
+    "csr_forms": [1, 2, 3, 5, 6, 7],
+    "load_forms": [0, 1, 2, 4, 5],
+    "store_forms": [0, 1, 2]
+  },
+  "limitations": [
+    "One active instruction and one retirement lane; 64x32 PRF and 32-entry ROB. No speculative or two-wide execution, caches, interrupts, board validation, or physical closure.",
+    "Selected ACT4 coverage only. The unmodified BEQ signature ELF exceeds the 64 KiB BRAM; all six branch forms are covered by directed tests and Sail differential.",
+    "Sail compares shared platform behavior after a checked six-instruction initialization. Fixed misa/mie/mip writes and machine counters use dedicated RTL/interpreter checks because Sail 0.10 differs.",
+    "Transport faults use local protocol checks; Sail differential covers architectural PMA faults. PHY0 and later tier gates remain open."
+  ]
+}

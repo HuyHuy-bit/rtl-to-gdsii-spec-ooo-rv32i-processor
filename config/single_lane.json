@@ -25,7 +25,7 @@
   "limitations": [
     "no speculative execution",
     "no interrupts or caches",
-    "not Tier A acceptance until ACT4 and broader architectural regression pass"
+    "not Architectural Slice acceptance until ACT4 and broader architectural regression pass"
   ],
   "seeds": [
     1,

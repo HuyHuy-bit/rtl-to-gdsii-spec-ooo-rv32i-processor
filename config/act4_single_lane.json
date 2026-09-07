@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "profile": "tier_a_selected_act4",
+  "profile": "architectural_slice_selected_act4",
   "seeds": [1, 42, 20260906],
   "instruction_limit": 250000,
   "selected_tests": [
@@ -31,5 +31,5 @@
     }
   ],
   "unexpected_skips_allowed": 0,
-  "tier_a_accepted": false
+  "architectural_slice_accepted": false
 }
