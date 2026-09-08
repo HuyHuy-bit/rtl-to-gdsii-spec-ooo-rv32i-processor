@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "profile": "serialized_rename_ownership_smoke",
+  "top": "rename_ownership",
+  "sources": ["rtl/generated/platform_pkg.sv", "rtl/core/single_lane_pkg.sv", "rtl/backend/rename_single.sv", "verif/formal/rename/rename_ownership.sv"],
+  "physical_registers": 64,
+  "architectural_registers": 32,
+  "maximum_inflight": 1,
+  "engine": "abc bmc3",
+  "cover_engine": "smtbmc yices",
+  "mode": "bmc",
+  "depth": 12,
+  "timeout_seconds": 600,
+  "assumptions": ["Reset is asserted at the initial sampled edge; subsequent reset, recovery, requests, register addresses, and watched indices are unconstrained."],
+  "environment": [
+    "At most one instruction is active. Allocation requires the independent monitor to be idle, without assuming DUT readiness.",
+    "Writeback names the captured live destination once; nonzero destinations commit only after writeback. Zero-destination instructions require no writeback.",
+    "Commit carries the allocation's original rename entry. Reset/recovery suppress commands and discard the live instruction.",
+    "A watched physical and architectural index are arbitrary at every step, so the assertions check all indices rather than one fixed register."
+  ],
+  "required_covers": ["reset_pending", "nonzero_commit", "zero_commit", "stalled_pending", "recover_pending", "recover_completed", "repeated_destination", "recycle_stale", "allocate_after_recovery"],
+  "mutation_policy": "Only copied RTL under out/ is changed. DUT-local assertions are disabled in mutated copies to require detection by the independent ownership monitor; baseline DUT assertions remain enabled.",
+  "mutations": [
+    {"name": "live_register_free", "old": "free_q[candidate] <= 0;", "new": "free_q[candidate] <= 1;", "assertions": ["ownership"]},
+    {"name": "free_committed_destination", "old": "free_q[commit_entry_i.stale] <= 1;", "new": "free_q[commit_entry_i.destination] <= 1;", "assertions": ["ownership", "fresh_destination"]},
+    {"name": "recover_reset_map", "old": "rat_q[i] <= committed_q[i];", "new": "rat_q[i] <= 6'(i);", "assertions": ["speculative_map", "source_maps"]},
+    {"name": "premature_ready", "old": "ready_q[candidate] <= 0;", "new": "ready_q[candidate] <= 1;", "assertions": ["owned_readiness", "source_readiness"]},
+    {"name": "free_zero", "old": "free_q <= 64'hffffffff00000000;", "new": "free_q <= 64'hffffffff00000001;", "assertions": ["zero_reserved"]}
+  ],
+  "claim": "Bounded smoke for the existing full-sized serialized rename module only; not induction, dual-lane ownership, ROB wrap, nested checkpoint recovery, or complete formal-readiness acceptance."
+}
