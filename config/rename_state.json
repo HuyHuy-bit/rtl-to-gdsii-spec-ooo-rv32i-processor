@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "profile": "two_wide_rename_state",
+  "architectural_registers": 32,
+  "physical_registers": 64,
+  "lanes": 2,
+  "packing": "Lane zero is older and occupies the low packed slice. Maps use six bits per architectural register.",
+  "rename": "Uses rename_bundle's complete selected prefix and pre-cycle free set. Accepted lanes update the speculative map in order. Commit releases become allocatable next cycle. resources_ready_i covers all downstream reservations and checkpoint needs.",
+  "writeback": "wb_accept_i is the arbiter's accepted live PRF-write mask, not producer valid. Nonzero tags must be distinct, allocated and previously unready. p0 writes are ignored. Accepted writes bypass readiness to arriving sources and retirement in the same cycle; allocation clears readiness, including same-bundle RAW.",
+  "retirement": "commit_i is an already accepted oldest ROB prefix, with masks 00, 01 or 11. Each nonzero destination must be ready after accepted writeback, with stale equal to its prior committed mapping. Lane one observes lane zero's committed update on WAW. An x0 destination carries zero destination/stale metadata. The owner updates the committed map and frees each stale tag once; the speculative map is unaffected by retirement.",
+  "priority": "Synchronous reset wins, then full-window recovery, then accepted writeback/retirement/rename. Recovery suppresses all events that cycle, restores the pre-cycle committed map, reconstructs free ownership, and marks only committed physical registers ready. Recovery does not incorporate same-cycle retirement.",
+  "reset": "x0 maps to ready reserved p0; x1..x31 map to ready p1..p31; p32..p63 are free and unready. This does not initialize PRF payloads.",
+  "snapshots": "rat_o, committed_o, free_o and ready_o expose registered pre-cycle state. ready_o does not include combinational writeback bypass. Free entries have zero readiness. Snapshots are observability/owner interfaces, not checkpoint restore inputs.",
+  "caller_obligations": "The ROB must validate instruction order, retirement eligibility and destination/stale identity. The completion arbiter must reject killed or stale generations before PRF acknowledgement; this unit has no ROB identity or generation filter. Local assertions catch malformed ownership events but cannot distinguish an old response after tag reuse. Only full-window recovery is supported here.",
+  "scope": "Standalone two-wide speculative/committed map and physical ownership state around the tested planner. No branch checkpoint storage/allocation histories, ROB/IQ integration, physical payload storage, or full two-wide ownership formal claim.",
+  "seeds": [
+    1,
+    42,
+    20260910
+  ],
+  "random_cycles_per_seed": 20000,
+  "directed_cycles": 160
+}
