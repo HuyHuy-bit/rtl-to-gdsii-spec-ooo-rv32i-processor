@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "profile": "two_wide_rename_bundle",
+  "architectural_registers": 32,
+  "physical_registers": 64,
+  "lanes": 2,
+  "lane_order": "lane_zero_in_low_slice_and_older",
+  "valid_masks": [0, 1, 3],
+  "checkpoint_cut": "A checkpoint-creating lane zero defers lane one; lane one otherwise terminates the bundle naturally.",
+  "allocation": "Select lowest available nonzero tags from the pre-cycle free set; commit releases are available next cycle. p0 is never allocated.",
+  "acceptance": "Accept the complete selected prefix only when all physical destinations exist and resources_ready_i is true. Invalid lane-one-only input is rejected. Reset and recovery suppress all outputs.",
+  "dependencies": "Sources use the map before their own destination write. Lane one observes lane zero's nonzero destination for RAW and stale-tag WAW; forwarded sources are not ready.",
+  "inputs": "The owner supplies a legal injective RAT with x0 mapped to p0, ready p0, and no mapped register free. ready_i includes any accepted writeback bypass. resources_ready_i covers the selected prefix's ROB/IQ/LQ/SQ/checkpoint reservations.",
+  "outputs": "All metadata is zero for unaccepted lanes. source_ready_o uses rs1 then rs2 per lane. allocation_o contains only accepted nonzero destinations.",
+  "scope": "Combinational bundle planning only. RAT/free-list storage, committed-map updates, checkpoint snapshots, recovery ownership, and pipeline integration remain separate tasks.",
+  "seeds": [1, 42, 20260910],
+  "random_cases_per_seed": 20000
+}
