@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "gate": "B0 formal readiness",
+  "status": "pass",
+  "profile": "assertion_portability_and_serialized_rename_smoke",
+  "claim": "Qualified clocked immediate assertions and bounded full-sized serialized rename ownership smoke.",
+  "limitations": [
+    "Only the portability fixture has an inductive proof; rename ownership is bounded to 12 steps with at most one active instruction.",
+    "No dual-lane or multi-inflight ownership proof, full free-pool exhaustion, ROB wrap, or nested checkpoint recovery acceptance.",
+    "Concurrent SVA, $past, $stable, disable iff, four-state semantics, and undriven anyseq under read_slang remain unqualified."
+  ],
+  "source_revision": "40efaa6867ec5c58f016b79a9fa9293ca5001e2c",
+  "dirty_tree": true,
+  "patch_sha256": "edbba6bd56ac768c28f49276d5c6e89218c6c8af56fafe13cd63d3efa1d9dfa1",
+  "platform_sha256": "378dbc14e4dda2a3d833f0f238441c55efda7224b2f969dec7710ed2602532de",
+  "command": [
+    "make",
+    "formal-readiness-check"
+  ],
+  "started_utc": "2026-09-10T02:44:48.983519+00:00",
+  "finished_utc": "2026-09-10T03:31:29.567495+00:00",
+  "archive": "evidence/formal_readiness/20260910T024448983559Z.tar.gz",
+  "archive_sha256": "342c99368f859ab29cab06261682d841ea483d796c12b7aa35f717eb095f92c7",
+  "manifest_sha256": "70b13383902e958ca61efbeade47c38a62326aa11696af407e326022453a8453",
+  "metrics": {
+    "portability_mutations": 6,
+    "portability_covers": 3,
+    "portability_induction": true,
+    "rename_mutations": 5,
+    "rename_covers": 9,
+    "rename_bmc_depth": 12,
+    "measured_commands": 29,
+    "max_rss_kib": 421400,
+    "job_duration_seconds": 792.762837
+  }
+}

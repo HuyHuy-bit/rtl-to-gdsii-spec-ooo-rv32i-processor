@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "gate": "B0 formal readiness",
+  "profile": "assertion_portability_and_serialized_rename_smoke",
+  "commands": [
+    [
+      "make",
+      "--no-print-directory",
+      "assert-portability"
+    ],
+    [
+      "make",
+      "--no-print-directory",
+      "rename-ownership-check"
+    ]
+  ],
+  "command_timeout_seconds": 4500,
+  "minimum_depth": 12,
+  "portability_mutations": 6,
+  "rename_mutations": 5,
+  "claim": "Qualified clocked immediate assertions and bounded full-sized serialized rename ownership smoke.",
+  "limitations": [
+    "Only the portability fixture has an inductive proof; rename ownership is bounded to 12 steps with at most one active instruction.",
+    "No dual-lane or multi-inflight ownership proof, full free-pool exhaustion, ROB wrap, or nested checkpoint recovery acceptance.",
+    "Concurrent SVA, $past, $stable, disable iff, four-state semantics, and undriven anyseq under read_slang remain unqualified."
+  ],
+  "portability_required_covers": [
+    "reset_reentry",
+    "stalled",
+    "sample_change"
+  ],
+  "rename_required_covers": [
+    "reset_pending",
+    "nonzero_commit",
+    "zero_commit",
+    "stalled_pending",
+    "recover_pending",
+    "recover_completed",
+    "repeated_destination",
+    "recycle_stale",
+    "allocate_after_recovery"
+  ],
+  "rename_required_mutations": [
+    "live_register_free",
+    "free_committed_destination",
+    "recover_reset_map",
+    "premature_ready",
+    "free_zero"
+  ]
+}

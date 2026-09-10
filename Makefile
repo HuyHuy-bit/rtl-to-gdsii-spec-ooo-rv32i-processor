@@ -13,6 +13,7 @@ OSS_CAD_SUITE ?= $(HOME)/tools/oss-cad-suite-20260905/oss-cad-suite
 .PHONY: architectural-slice-check architectural-slice-evidence-check architectural-slice-checker-test
 .PHONY: assert-portability
 .PHONY: rename-ownership-check
+.PHONY: formal-readiness-check formal-readiness-evidence-check formal-readiness-checker-test
 
 doctor:
 	@python3 tools/doctor.py --lock config/toolchain.lock --profile "$(PROFILE)"
@@ -22,6 +23,15 @@ assert-portability:
 
 rename-ownership-check:
 	@python3 tools/run_rename_ownership.py --suite "$(OSS_CAD_SUITE)"
+
+formal-readiness-check:
+	@python3 tools/run_formal_readiness.py --suite "$(OSS_CAD_SUITE)"
+
+formal-readiness-evidence-check:
+	@python3 tools/check_formal_readiness.py
+
+formal-readiness-checker-test:
+	@python3 -m unittest -v tests/test_formal_readiness.py
 
 architectural-slice-check:
 	@python3 tools/run_architectural_slice.py
