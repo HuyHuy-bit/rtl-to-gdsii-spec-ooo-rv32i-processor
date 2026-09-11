@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "profile": "rename_branch_checkpoints",
+  "entries": 8,
+  "architectural_registers": 32,
+  "physical_registers": 64,
+  "snapshot_bits": 192,
+  "creation": "At most one checkpoint per accepted rename bundle. snapshot_i is the injective speculative RAT after renaming the terminating CFI, including its JAL/JALR link and any older lane. allocation_i contains all nonzero physical destinations actually allocated by that bundle. Existing checkpoints record these allocations; the new checkpoint starts with an empty younger history.",
+  "handshake": "The caller qualifies create_i with all non-checkpoint rename prerequisites, including physical tags and downstream reservations. create_accept_o = create_i && create_ready_o; create_id_o is meaningful only on acceptance. The lowest pre-cycle inactive slot is chosen. When full, a concurrent correct resolution does not make its slot available until next cycle. The caller must suppress rename acceptance and allocation_i when a requested checkpoint stalls; ordinary non-CFI rename may continue when full if other resources permit.",
+  "resolution": "resolve_i is one already accepted live branch resolution, with its checkpoint slot and mispredict flag. Correct resolution releases only that checkpoint; younger checkpoints remain ordered independently of physical slot numbers. Correct resolution and creation may coincide in distinct pre-cycle slots. A resolution's ROB/generation identity must be checked upstream; slot IDs alone cannot reject stale responses after reuse.",
+  "recovery": "A valid misprediction returns the stored RAT and exactly the surviving allocations younger than that CFI. released_o includes the resolved checkpoint and all younger live checkpoints, preserving older ones. Reclaimed tags are removed from every retained history. No writeback-ready bitmap is restored: integration must OR reclaim_o into the current free set, clear readiness only for reclaimed tags, and retain readiness of surviving destinations.",
+  "priority": "Synchronous reset or full-window flush clears the bank and suppresses all output transactions. Otherwise misprediction suppresses create/allocation updates and emits the pre-cycle restore packet. An invalid resolve ID asserts and yields no restore/release. A misprediction request still blocks creation even if invalid. Ordinary resolution, allocation accumulation and creation follow in that order.",
+  "ownership": "p0 is never allocated. allocation_i must contain only fresh allocations, not registers already in an active younger history. The ROB prevents retirement past any unresolved checkpoint CFI. Older instructions may retire and release stale tags while checkpoints remain live; later younger reuse of those tags must enter the allocation histories. Snapshot entries remain live until checkpoint resolution or recovery.",
+  "outputs": "valid_o is the pre-cycle active slot mask. released_o identifies slots released this cycle; reset/flush rely on global invalidation and return zero. restore_rat_o and reclaim_o are zero unless restore_valid_o is asserted. All events are same-cycle transactions; upstream recovery arbitration must accept and globally apply the restore atomically, suppress retirement/rename, and reject killed completions before PRF writes.",
+  "scope": "Standalone checkpoint storage and younger-allocation histories. Not yet wired to rename_state or single_lane_core. No predictor-history checkpoint, recovery arbiter, ROB identity filter, or integrated multi-inflight formal acceptance is claimed.",
+  "seeds": [
+    1,
+    42,
+    20260910
+  ],
+  "random_cycles_per_seed": 20000,
+  "directed_cycles": 32
+}
