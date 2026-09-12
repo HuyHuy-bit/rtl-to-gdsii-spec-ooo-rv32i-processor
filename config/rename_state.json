@@ -11,13 +11,14 @@
   "priority": "Synchronous reset wins, then full-window recovery, then accepted writeback/retirement/rename. Recovery suppresses all events that cycle, restores the pre-cycle committed map, reconstructs free ownership, and marks only committed physical registers ready. Recovery does not incorporate same-cycle retirement.",
   "reset": "x0 maps to ready reserved p0; x1..x31 map to ready p1..p31; p32..p63 are free and unready. This does not initialize PRF payloads.",
   "snapshots": "rat_o, committed_o, free_o and ready_o expose registered pre-cycle state. ready_o does not include combinational writeback bypass. Free entries have zero readiness. Snapshots are observability/owner interfaces, not checkpoint restore inputs.",
-  "caller_obligations": "The ROB must validate instruction order, retirement eligibility and destination/stale identity. The completion arbiter must reject killed or stale generations before PRF acknowledgement; this unit has no ROB identity or generation filter. Local assertions catch malformed ownership events but cannot distinguish an old response after tag reuse. Only full-window recovery is supported here.",
-  "scope": "Standalone two-wide speculative/committed map and physical ownership state around the tested planner. No branch checkpoint storage/allocation histories, ROB/IQ integration, physical payload storage, or full two-wide ownership formal claim.",
+  "caller_obligations": "The ROB must validate instruction order, retirement eligibility and destination/stale identity. The completion arbiter must reject killed or stale generations before PRF acknowledgement; this unit has no ROB identity or generation filter. Local assertions catch malformed ownership events but cannot distinguish an old response after tag reuse. Branch restore inputs must come from validated checkpoint recovery, with reclaimed tags currently allocated and disjoint from the retained map.",
+  "scope": "Two-wide speculative/committed map and physical ownership state around the planner, with explicit full-window and branch-restore ports. rename_recovery connects the latter to the checkpoint bank. No ROB/IQ integration, payload storage, or multi-inflight formal acceptance.",
   "seeds": [
     1,
     42,
     20260910
   ],
   "random_cycles_per_seed": 20000,
-  "directed_cycles": 160
+  "directed_cycles": 160,
+  "branch_recovery": "branch_recover_i consumes a validated post-CFI branch_rat_i and live younger branch_reclaim_i mask. It suppresses rename and requires commit_i=0. It restores the speculative map, preserves the committed map, unions reclaim with the pre-cycle free set, and clears only reclaimed readiness bits after surviving accepted-writeback bypass. Full-window recovery and reset take priority. Accepted writebacks must not name reclaimed tags."
 }

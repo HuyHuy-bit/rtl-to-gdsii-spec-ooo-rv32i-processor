@@ -14,7 +14,7 @@ OSS_CAD_SUITE ?= $(HOME)/tools/oss-cad-suite-20260905/oss-cad-suite
 .PHONY: assert-portability
 .PHONY: rename-ownership-check
 .PHONY: rename-bundle-check
-.PHONY: rename-state-check rename-checkpoints-check
+.PHONY: rename-state-check rename-checkpoints-check rename-recovery-check
 .PHONY: formal-readiness-check formal-readiness-evidence-check formal-readiness-checker-test
 
 doctor:
@@ -34,6 +34,9 @@ rename-state-check:
 
 rename-checkpoints-check:
 	@python3 tools/run_rename_checkpoints.py --suite "$(OSS_CAD_SUITE)"
+
+rename-recovery-check:
+	@python3 tools/run_rename_recovery.py --suite "$(OSS_CAD_SUITE)"
 
 formal-readiness-check:
 	@python3 tools/run_formal_readiness.py --suite "$(OSS_CAD_SUITE)"

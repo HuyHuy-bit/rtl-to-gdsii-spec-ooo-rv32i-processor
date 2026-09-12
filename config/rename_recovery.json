@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "profile": "two_wide_rename_recovery",
+  "sources": [
+    "rtl/backend/rename_recovery.sv",
+    "rtl/backend/rename_state.sv",
+    "rtl/backend/rename_checkpoints.sv",
+    "rtl/backend/rename_bundle.sv"
+  ],
+  "architectural_registers": 32,
+  "physical_registers": 64,
+  "checkpoints": 8,
+  "lanes": 2,
+  "rename": "One acceptance mask owns map updates, allocation history and optional checkpoint creation. All physical and external resources must be available; a selected CFI also needs a pre-cycle checkpoint slot. The oldest CFI terminates the bundle, and the checkpoint snapshot includes every accepted destination in lane order. Full-bank correct resolution does not permit same-cycle slot reuse. No checkpoint is created on physical/downstream shortage.",
+  "priority": "Reset, then full-window recover_i, then a live selected branch misprediction, then ordinary accepted events. Branch recovery suppresses the complete rename and retirement masks. Full recovery additionally clears the checkpoint bank and all writeback/resolve acceptance; it restores pre-cycle committed state.",
+  "branch_recovery": "Restore the post-CFI speculative map and OR the checkpoint's younger-allocation mask into the CURRENT free set. Do not overwrite the committed map or restore checkpoint-time readiness. Preserve current readiness plus same-cycle accepted surviving writes, clearing only reclaimed tags. The CFI and its link destination survive; its checkpoint and all younger checkpoints are released.",
+  "writeback": "wb_offer_i names two candidate PRF writes chosen by upstream arbitration; wb_live_i is the upstream ROB/generation-valid qualification. wb_accept_o is the final shared PRF-write/readiness/wakeup/ROB-completion decision. Accept only offered live nonzero allocated unready tags that survive recovery. Duplicate tags use lane zero priority. A ready tag or p0 is not accepted as a payload write. Resultless completion and disposal of canceled producer packets use separate upstream handshakes.",
+  "retirement": "commit_i is an eligible oldest ROB prefix already qualified by event-sink readiness, with valid destination/stale metadata. commit_accept_o adds global recovery suppression and is the actual retirement decision shared with the rest of the machine. The upstream ROB prohibits retirement past an unresolved CFI and validates ordering/identity. Same-cycle accepted writeback may satisfy destination readiness.",
+  "resolution": "resolve_i names the resolution selected by upstream age/recovery arbitration. resolve_live_i validates its ROB/generation identity. resolve_accept_o also requires a currently active slot and no reset/full recovery. Only accepted live mispredictions trigger recovery. A correct resolution may coincide with rename and a new checkpoint in another pre-cycle slot.",
+  "identity_boundary": "This module consumes live qualifiers; it does not compute generation identity. Tests model that upstream decision and inject live=false stale packets after tag/slot reuse. Physical tag and checkpoint slot numbers alone cannot reject stale generations. The future completion/ROB integration must supply trustworthy qualifiers and apply acceptance/recovery atomically to all consumers.",
+  "scope": "Integrated rename planner, map/free/readiness owner and checkpoint bank only. No PRF payload, OOO ROB/IQ, branch execution, frontend predictor or processor integration. Simulation/mutation/synthesis evidence is not the future multi-inflight ownership formal gate.",
+  "seeds": [
+    1,
+    42,
+    20260912
+  ],
+  "directed_cycles": 59,
+  "random_cycles_per_seed": 20000
+}

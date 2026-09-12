@@ -77,6 +77,8 @@ public:
             ready |= UINT64_C(1) << pending[index].destination;
         }
         require(in.commits <= 2 && in.commits <= pending.size(), "bad test retirement");
+        dut.branch_recover_i = 0; dut.branch_reclaim_i = 0;
+        for (unsigned word = 0; word < 6; ++word) dut.branch_rat_i[word] = 0;
         dut.clk_i = 0; dut.rst_i = in.reset; dut.recover_i = in.recover;
         dut.valid_i = in.valid; dut.checkpoint_i = in.checkpoint;
         dut.resources_ready_i = in.resources;

@@ -1,6 +1,9 @@
 `default_nettype none
 module rename_state (
   input wire clk_i, rst_i, recover_i, resources_ready_i,
+  input wire branch_recover_i,
+  input wire [191:0] branch_rat_i,
+  input wire [63:0] branch_reclaim_i,
   input wire [1:0] valid_i, checkpoint_i,
   input wire [9:0] rs1_i, rs2_i, rd_i,
   input wire [1:0] wb_accept_i, commit_i,
@@ -30,7 +33,7 @@ module rename_state (
   end
 
   rename_bundle planner (
-    .rst_i, .recover_i, .resources_ready_i, .valid_i, .checkpoint_i,
+    .rst_i, .recover_i(recover_i || branch_recover_i), .resources_ready_i, .valid_i, .checkpoint_i,
     .rs1_i, .rs2_i, .rd_i, .rat_i(rat_q), .free_i(free_q), .ready_i(ready_view),
     .accept_o, .source1_o, .source2_o, .destination_o, .stale_o,
     .source_ready_o, .allocation_o
@@ -59,6 +62,12 @@ module rename_state (
         free_d[destination_o[lane*6 +: 6]] = 0;
         ready_d[destination_o[lane*6 +: 6]] = 0;
       end
+    end
+    if (branch_recover_i) begin
+      rat_d = branch_rat_i;
+      committed_d = committed_q;
+      free_d = free_q | branch_reclaim_i;
+      ready_d = ready_view & ~branch_reclaim_i;
     end
     if (recover_i) begin
       rat_d = committed_q;
@@ -92,12 +101,20 @@ module rename_state (
     released = 0;
     destinations = 0;
     if (!rst_i && !recover_i) begin
+      if (branch_recover_i) begin
+        assert (commit_i == 0 && !branch_reclaim_i[0] && (branch_reclaim_i & free_q) == 0)
+          else $fatal(1, "RENAME_STATE_BRANCH_RECOVERY");
+        for (int arch = 0; arch < 32; arch++)
+          assert (!branch_reclaim_i[branch_rat_i[arch*6 +: 6]])
+            else $fatal(1, "RENAME_STATE_RECLAIM_MAPPING");
+      end
       assert (commit_i != 2'b10) else $fatal(1, "RENAME_STATE_COMMIT_PREFIX");
       assert (!free_q[0] && ready_q[0] && rat_q[5:0] == 0 && committed_q[5:0] == 0)
         else $fatal(1, "RENAME_STATE_ZERO");
       for (int lane = 0; lane < 2; lane++) begin
         if (wb_accept_i[lane] && wb_destination_i[lane*6 +: 6] != 0) begin
-          assert (!free_q[wb_destination_i[lane*6 +: 6]] && !ready_q[wb_destination_i[lane*6 +: 6]])
+          assert (!free_q[wb_destination_i[lane*6 +: 6]] && !ready_q[wb_destination_i[lane*6 +: 6]]
+                  && (!branch_recover_i || !branch_reclaim_i[wb_destination_i[lane*6 +: 6]]))
             else $fatal(1, "RENAME_STATE_WB_OWNER");
           if (lane == 1 && wb_accept_i[0])
             assert (wb_destination_i[11:6] != wb_destination_i[5:0])
