@@ -13,6 +13,7 @@ OSS_CAD_SUITE ?= $(HOME)/tools/oss-cad-suite-20260905/oss-cad-suite
 .PHONY: architectural-slice-check architectural-slice-evidence-check architectural-slice-checker-test
 .PHONY: assert-portability
 .PHONY: rename-ownership-check rename-recovery-ownership-check
+.PHONY: rob-two-wide-check
 .PHONY: rename-bundle-check
 .PHONY: rename-state-check rename-checkpoints-check rename-recovery-check
 .PHONY: formal-readiness-check formal-readiness-evidence-check formal-readiness-checker-test
@@ -28,6 +29,9 @@ rename-ownership-check:
 
 rename-recovery-ownership-check:
 	@python3 tools/run_rename_recovery_ownership.py --suite "$(OSS_CAD_SUITE)"
+
+rob-two-wide-check:
+	@python3 tools/run_rob_two_wide.py --suite "$(OSS_CAD_SUITE)"
 
 rename-bundle-check:
 	@python3 tools/run_rename_bundle.py --suite "$(OSS_CAD_SUITE)"
