@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "status": "pass",
+  "profile": "two_wide_rename_recovery_ownership",
+  "claim": "Unbounded safety by k-induction for the connected rename subsystem under the four-inflight, x0-x3 workload contract. Full hardware geometry is retained. Depth-12 covers and mutation checks are bounded. This is not arbitrary-register/workload ownership, full resource exhaustion, upstream ROB/generation identity validation, ROB wrap, processor integration, liveness or the complete two-wide formal milestone.",
+  "archive": "evidence/rename_recovery_ownership/20260912T183812651019Z.tar.gz",
+  "archive_sha256": "e8804af1b21572164a2d1d940a4e00d197f91e9237c6a1b9391ddb04a891b844",
+  "manifest_sha256": "cf9d7a96e8d732ead5969f85f4eddc9efa96b3e6e348b9b9cc7a2bcab8040f3f",
+  "inputs_sha256": {
+    "rtl/backend/rename_bundle.sv": "7395d447a6e45b1cc6884a7f43319fdb31987c56158ec16199929882d3d5fe69",
+    "rtl/backend/rename_state.sv": "9a6274441c4d16e11ce026f97f22f9557b50b18a8e99f4b272cb6ab8a9489288",
+    "rtl/backend/rename_checkpoints.sv": "0fea123ef8b0e735e35ac71d439c6e23c71a5b3547c9c4f483021b617ccc6b2c",
+    "rtl/backend/rename_recovery.sv": "35ccc742c7ce63fb90a2cdd8e5bb929968e5fb49218a2e499714f88fb10bf2b8",
+    "verif/formal/rename/rename_recovery_ownership.sv": "4b8c6adac5628928e05804518994b87f700abefeb2f73ddf20758aeb0be9105b",
+    "config/rename_recovery_ownership.json": "fffee8de3bf562f3e3ab17198c8e48e7e31959a26e08ac201032c1b1cdb569c1",
+    "config/formal_tools.lock": "14ad6a318aed3ec572fa3a8cf34a3210a1319b04565349dbba125e4c4c9fe993",
+    "config/synthesis.lock": "6e5753a294bab89ea89d5b3454d1741c415cb6db267904fe70e70dd89d9f2a7c",
+    "tools/run_rename_recovery_ownership.py": "f235754900ade164f5245442505dfb1431c76a3ebe7eff0744f0254d4f822a92",
+    "tools/run_assert_portability.py": "130e2d3f0c1641088e92ccdf50f08c106583691bc7e730e4399f177cb77f23f2",
+    "Makefile": "da58d2865e16098ef1ec85c6c23592725f07481519efe2299f1e3f7ccd57600d",
+    "config/toolchain.lock": "11fecc1b53390b04ec510790210d500198322c0ccffc04605ea9ee6994fa87c0",
+    "config/rename_recovery.json": "d8ea09fa5bb70b72f378c326de57476ceb770dc28f5e7828fbcc01064df3bb2e"
+  },
+  "formal_readiness_accepted": false
+}

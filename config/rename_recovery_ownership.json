@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "profile": "two_wide_rename_recovery_ownership",
+  "top": "rename_recovery_ownership",
+  "sources": [
+    "rtl/backend/rename_bundle.sv",
+    "rtl/backend/rename_state.sv",
+    "rtl/backend/rename_checkpoints.sv",
+    "rtl/backend/rename_recovery.sv",
+    "verif/formal/rename/rename_recovery_ownership.sv"
+  ],
+  "physical_registers": 64,
+  "architectural_registers": 32,
+  "checkpoints": 8,
+  "maximum_inflight": 4,
+  "workload_registers": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "engine": "smtbmc bitwuzla",
+  "cover_engine": "smtbmc yices",
+  "mode": "prove",
+  "depth": 3,
+  "timeout_seconds": 600,
+  "assumptions": [
+    "Initial sampled edge asserts reset; all subsequent reset, full recovery, requests, live qualifiers and candidate indices are unconstrained top-level inputs."
+  ],
+  "environment": [
+    "The independent ordered four-entry ledger gates downstream resource readiness using pre-cycle space; no DUT readiness or output is assumed.",
+    "Rename source and destination addresses range over x0 through x3; hardware retains all 32 architectural mappings, 64 physical tags and 8 checkpoint slots. All map, free and ready bits are asserted.",
+    "Live writebacks select any ledger instruction, allowing out-of-order completion and duplicate offers. Non-live offers carry arbitrary six-bit tags, including reused ones. Upstream producer/generation validation is modeled, not implemented or proved.",
+    "Resolution selects any slot and may be non-live; retirement is an oldest completed prefix of up to two instructions and cannot pass an unresolved CFI. Same-cycle WB can qualify retirement; recovery overrides acceptance.",
+    "Expected outputs and ledger transitions derive only from inputs and independent state. Branch age and reclaimed tags derive from instruction positions, without copying DUT checkpoint snapshots or histories."
+  ],
+  "required_covers": [
+    "reset_pending",
+    "four_inflight",
+    "dual_waw",
+    "lane_one_cfi",
+    "dual_retirement",
+    "dual_waw_retirement",
+    "dual_writeback",
+    "out_of_order_completion",
+    "retire_and_rename",
+    "nested_recovery",
+    "younger_checkpoint_kill",
+    "surviving_writeback",
+    "branch_link_writeback",
+    "killed_writeback",
+    "recovery_retire_collision",
+    "correct_resolve_create",
+    "retired_tag_reuse",
+    "killed_tag_reuse",
+    "checkpoint_slot_reuse",
+    "stale_writeback_reuse",
+    "stale_resolution_reuse",
+    "full_recovery"
+  ],
+  "mutation_policy": "Copied DUT sources under out/ disable all DUT assertions for mutations. An explicitly named independent monitor assertion and a counterexample are required; timeout or another failure is not detection.",
+  "mutations": [
+    {
+      "name": "pre_cfi_snapshot",
+      "source": "rtl/backend/rename_recovery.sv",
+      "old": "snapshot[rd_i[lane*5 +: 5]*6 +: 6] = destination_o[lane*6 +: 6];",
+      "new": "snapshot[rd_i[lane*5 +: 5]*6 +: 6] = rat_o[rd_i[lane*5 +: 5]*6 +: 6];",
+      "assertions": [
+        "speculative_map",
+        "checkpoint_snapshots"
+      ]
+    },
+    {
+      "name": "ignored_wb_live",
+      "source": "rtl/backend/rename_recovery.sv",
+      "old": "wb_offer_i[lane] && wb_live_i[lane]",
+      "new": "wb_offer_i[lane]",
+      "assertions": [
+        "writeback_acceptance"
+      ]
+    },
+    {
+      "name": "ignored_resolve_live",
+      "source": "rtl/backend/rename_recovery.sv",
+      "old": "resolve_i && resolve_live_i &&",
+      "new": "resolve_i &&",
+      "assertions": [
+        "resolution_acceptance"
+      ]
+    },
+    {
+      "name": "accepted_killed_wb",
+      "source": "rtl/backend/rename_recovery.sv",
+      "old": "&& !reclaim_o[wb_destination_i[lane*6 +: 6]]",
+      "new": "&& 1'b1",
+      "assertions": [
+        "writeback_acceptance"
+      ]
+    },
+    {
+      "name": "lost_current_free",
+      "source": "rtl/backend/rename_state.sv",
+      "old": "free_d = free_q | branch_reclaim_i;",
+      "new": "free_d = branch_reclaim_i;",
+      "assertions": [
+        "ownership",
+        "fixed_free"
+      ]
+    },
+    {
+      "name": "premature_survivor_ready",
+      "source": "rtl/backend/rename_state.sv",
+      "old": "ready_d = ready_view & ~branch_reclaim_i;",
+      "new": "ready_d = ~free_d;",
+      "assertions": [
+        "readiness"
+      ]
+    },
+    {
+      "name": "wrong_retire_release",
+      "source": "rtl/backend/rename_state.sv",
+      "old": "free_d[commit_stale_i[lane*6 +: 6]] = 1;",
+      "new": "free_d[commit_destination_i[lane*6 +: 6]] = 1;",
+      "assertions": [
+        "ownership"
+      ]
+    },
+    {
+      "name": "lost_older_history",
+      "source": "rtl/backend/rename_checkpoints.sv",
+      "old": "history_d[slot] = history_q[slot] & ~reclaim_o;",
+      "new": "history_d[slot] = 0;",
+      "assertions": [
+        "recovery_packet",
+        "checkpoint_histories"
+      ]
+    }
+  ],
+  "claim": "Unbounded safety by k-induction for the connected rename subsystem under the four-inflight, x0-x3 workload contract. Full hardware geometry is retained. Depth-12 covers and mutation checks are bounded. This is not arbitrary-register/workload ownership, full resource exhaustion, upstream ROB/generation identity validation, ROB wrap, processor integration, liveness or the complete two-wide formal milestone.",
+  "mutation_engine": "smtbmc yices",
+  "cover_depth": 12,
+  "mutation_depth": 12,
+  "additional_solver": {
+    "name": "bitwuzla",
+    "version": "0.9.1",
+    "sha256": {
+      "bin/bitwuzla": "c431fcbda03829b2e06955be1b52186de2fcbd40415e86abad4704fb994bf40a"
+    }
+  },
+  "state_invariants": [
+    "Committed mappings are unique and nonzero except x0; untouched x4-x31 retain their reset mapping.",
+    "Every live destination is distinct from committed and earlier live owners; stale tags follow the ordered map walk. Unused ledger entries are zero.",
+    "Checkpoint slots are uniquely owned by unresolved CFIs. Snapshots, younger-allocation histories and age masks equal independent ledger reconstructions.",
+    "The reference allocator searches p1-p3 and p32-p35. Pool closure, fixed free/ready bits, live tag bounds, nonzero ownership and agreement with the full-sized DUT allocator are asserted, not assumed. Four in-flight entries and three writable names cannot exhaust this pool when admission has space."
+  ]
+}
