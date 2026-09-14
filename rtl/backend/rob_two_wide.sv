@@ -58,26 +58,31 @@ module rob_two_wide (
   assign head_id_o = {generation_q[head_q], head_q};
   assign clear_window = flush_i || trap_accept_o;
 
+  assign trap_valid_o = head_valid_o && done_q[head_q] && event_q[head_q].trap;
+  assign trap_accept_o = trap_valid_o && trap_take_i;
   always_comb begin
-    trap_valid_o = head_valid_o && done_q[head_q] && event_q[head_q].trap;
-    trap_accept_o = trap_valid_o && trap_take_i;
     trap_event_o = event_q[head_q];
     trap_event_o.valid = trap_valid_o;
     trap_event_o.order = order_q;
     trap_event_o.retired = 0;
-    resolve_ready_o = !rst_i && !clear_window && valid_q[resolve_slot]
+  end
+  assign resolve_ready_o = !rst_i && !clear_window && valid_q[resolve_slot]
       && generation_q[resolve_slot] == resolve_id_i[12:5]
       && cfi_q[resolve_slot] && !resolved_q[resolve_slot];
-    resolve_accept_o = resolve_offer_i && resolve_take_i && resolve_ready_o;
-    branch_recover_o = resolve_accept_o && mispredict_i;
+  assign resolve_accept_o = resolve_offer_i && resolve_take_i && resolve_ready_o;
+  assign branch_recover_o = resolve_accept_o && mispredict_i;
 
-    allocate_id_o = {{next_generation_q[second_tail], second_tail}, {next_generation_q[tail_q], tail_q}};
+  assign allocate_id_o = {{next_generation_q[second_tail], second_tail}, {next_generation_q[tail_q], tail_q}};
+  always_comb begin
     allocate_ready_o = 0;
     if (!rst_i && !clear_window && !branch_recover_o && !drained_i) begin
       allocate_ready_o[0] = count_q < 32 && !exhausted_q[tail_q];
       allocate_ready_o[1] = allocate_ready_o[0] && count_q < 31 && !exhausted_q[second_tail];
     end
-    allocate_accept_o = allocate_i & allocate_ready_o;
+  end
+  assign allocate_accept_o = allocate_i & allocate_ready_o;
+
+  always_comb begin
 
     complete_ready_o = 0;
     complete_destination_o = 0;
@@ -90,7 +95,10 @@ module rob_two_wide (
     end
     if (complete_offer_i[0] && complete_id_i[12:0] == complete_id_i[25:13])
       complete_ready_o[1] = 0;
-    complete_accept_o = complete_offer_i & complete_take_i & complete_ready_o;
+  end
+  assign complete_accept_o = complete_offer_i & complete_take_i & complete_ready_o;
+
+  always_comb begin
 
     retire_valid_o = 0;
     if (!rst_i && !clear_window && !branch_recover_o) begin
@@ -100,7 +108,9 @@ module rob_two_wide (
         && !event_q[second_head].trap && (!cfi_q[second_head] || resolved_q[second_head])
         && !solo_q[head_q] && !solo_q[second_head];
     end
-    retire_accept_o = retire_take_i & retire_valid_o;
+  end
+  assign retire_accept_o = retire_take_i & retire_valid_o;
+  always_comb begin
     retire_rd_o = {rd_q[second_head], rd_q[head_q]};
     retire_destination_o = {destination_q[second_head], destination_q[head_q]};
     retire_stale_o = {stale_q[second_head], stale_q[head_q]};

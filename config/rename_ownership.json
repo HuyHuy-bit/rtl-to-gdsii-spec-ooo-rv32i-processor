@@ -10,7 +10,8 @@
   "cover_engine": "smtbmc yices",
   "mode": "bmc",
   "depth": 12,
-  "timeout_seconds": 600,
+  "timeout_seconds": 900,
+  "timeout_reason": "Additional wall-clock headroom after the unchanged depth-12 serialized workload exceeded 600 seconds during backend integration validation. Solver, depth, assertions, assumptions, covers and mutation requirements are unchanged.",
   "assumptions": ["Reset is asserted at the initial sampled edge; subsequent reset, recovery, requests, register addresses, and watched indices are unconstrained."],
   "environment": [
     "At most one instruction is active. Allocation requires the independent monitor to be idle, without assuming DUT readiness.",

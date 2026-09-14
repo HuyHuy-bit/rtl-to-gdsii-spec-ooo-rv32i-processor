@@ -47,6 +47,9 @@ module rename_recovery (
           wb_accept_o[lane] = 1;
       end
     end
+  end
+
+  always_comb begin
     snapshot = rat_o;
     for (int lane = 0; lane < 2; lane++)
       if (accept_o[lane] && rd_i[lane*5 +: 5] != 0)
