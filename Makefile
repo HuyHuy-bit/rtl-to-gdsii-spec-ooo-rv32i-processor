@@ -14,6 +14,7 @@ OSS_CAD_SUITE ?= $(HOME)/tools/oss-cad-suite-20260905/oss-cad-suite
 .PHONY: assert-portability
 .PHONY: rename-ownership-check rename-recovery-ownership-check
 .PHONY: backend-two-wide-check
+.PHONY: issue-queue-check
 .PHONY: rob-two-wide-check
 .PHONY: rename-bundle-check
 .PHONY: rename-state-check rename-checkpoints-check rename-recovery-check
@@ -33,6 +34,9 @@ rename-recovery-ownership-check:
 
 backend-two-wide-check:
 	@python3 tools/run_backend_two_wide.py --suite "$(OSS_CAD_SUITE)"
+
+issue-queue-check:
+	@python3 tools/run_issue_queue.py --suite "$(OSS_CAD_SUITE)"
 
 rob-two-wide-check:
 	@python3 tools/run_rob_two_wide.py --suite "$(OSS_CAD_SUITE)"
