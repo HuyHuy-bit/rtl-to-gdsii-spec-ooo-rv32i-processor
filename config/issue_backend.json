@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "profile": "two_wide_issue_backend",
+  "queue_entries": 16,
+  "rob_entries": 32,
+  "identity_bits": 13,
+  "payload_bits": 64,
+  "sources": [
+    "rtl/generated/commit_event_pkg.sv",
+    "rtl/backend/rename_bundle.sv",
+    "rtl/backend/rename_state.sv",
+    "rtl/backend/rename_checkpoints.sv",
+    "rtl/backend/rename_recovery.sv",
+    "rtl/backend/rob_two_wide.sv",
+    "rtl/backend/prf_4r2w.sv",
+    "rtl/backend/backend_two_wide.sv",
+    "rtl/backend/issue_queue.sv",
+    "rtl/backend/issue_backend.sv"
+  ],
+  "allocation": "One transaction covers rename, ROB and issue queue. valid_i is a packed oldest prefix and a lane-zero CFI terminates it; the queue credits for that whole selected prefix join resources_ready_i, the PRF pool, the checkpoint bank and the ROB credits, so a shortage in any one of them stalls the entire bundle. There is no lane-zero fallback and no issue-credit bypass: pre-cycle queue occupancy alone decides credits, so slots freed by this cycle's launches are not reusable until the next cycle. allocate_accept_o is the only dispatch authority; every accepted instruction enters the queue with its renamed tags, rename operand readiness, ROB identity, destination and the caller's opaque payload and port eligibility. Commit-only operations are not routed around the queue.",
+  "wakeup": "The queue observes exactly wb_accept_o and wb_destination_o, so operand wakeup, PRF writes and PRF read bypass consume the same accepted backend transaction. Raw producer offers, killed packets, traps and resultless completions never wake an operand. Dispatch readiness carries the accepted rename bundle, including lane-zero RAW bypass and current accepted writebacks, so an enqueue needs no second broadcast.",
+  "reads": "Selection drives the four PRF read ports through issue_source_o: port zero's operands occupy ports zero and one, port one's occupy ports two and three. A launched instruction always reads with read_ready_o set, including the same-cycle accepted writeback that woke it, because a resident operand tag can neither be reclaimed by recovery nor released by commit while its consumer is still queued. Unselected ports address p0 and read zero. Queue entries hold tags, not values.",
+  "recovery": "Reset, full flush and accepted traps clear the window, the queue and the rename speculative state together. An accepted mispredicting resolution recovers rename from the branch's checkpoint, cuts the ROB after the branch slot and kills exactly the queue entries younger than that slot using the pre-cycle head, while allocation, retirement and launch are suppressed for that cycle and surviving writebacks still latch readiness. drained_i additionally requires an empty queue.",
+  "scope": "Connected two-wide rename, checkpoints, 32-entry ROB, 64-entry PRF and 16-entry issue queue, driven by synthetic dispatch, completion, resolution and execution-port readiness. No execution units, memory launch, CSR/MMIO head state machine, frontend, physical issue/read/execute timing closure or complete OOO processor acceptance. Completions remain caller-supplied, so producer cancellation, age arbitration and commit-only head operations are still future work. This gate is full-size simulation, independent mutation testing and generic synthesis, not an integrated formal proof.",
+  "seeds": [1, 42, 20260916],
+  "random_cycles_per_seed": 20000,
+  "directed_cycles": 101,
+  "verification": "Normal directed, random and drain stimulus assigns CFIs exclusively to port zero and offers live branch resolution only after a prior accepted issue. The independent ledger rejects accepted resolution of an unissued branch or allocation of a CFI with other port eligibility; separate negative tests verify both stimulus guards. branch_issue counts checked CFI launches, and resolution_after_issue counts accepted resolutions guarded by prior issue. simultaneous_checkpoint_create_resolve counts overlapping checkpoint creation and resolution, not release and later reallocation of the same checkpoint slot. These are scenario counters, not an exhaustive coverage or liveness claim."
+}
