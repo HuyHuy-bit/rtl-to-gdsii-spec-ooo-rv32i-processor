@@ -1,0 +1,5 @@
+`verilator_config
+lint_off -rule PINCONNECTEMPTY -file "*integer_backend.sv"
+lint_off -rule PINCONNECTEMPTY -file "*alu_pipeline.sv"
+lint_off -rule UNUSEDPARAM -file "*platform_pkg.sv"
+lint_off -rule UNUSEDSIGNAL -file "*execute_single.sv" -match "*decoded_i*"

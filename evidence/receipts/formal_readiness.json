@@ -9,19 +9,19 @@
     "No dual-lane or multi-inflight ownership proof, full free-pool exhaustion, ROB wrap, or nested checkpoint recovery acceptance.",
     "Concurrent SVA, $past, $stable, disable iff, four-state semantics, and undriven anyseq under read_slang remain unqualified."
   ],
-  "source_revision": "8d586f896b555aab8a6e5123c74a7c84a6a63e7a",
+  "source_revision": "637300d114048c8a03db2dc8466f094b629c7fd7",
   "dirty_tree": true,
-  "patch_sha256": "790198fceb6da32647acc45f81e9b05ee9067a5d75f5b8b404b6404dea36fe3b",
+  "patch_sha256": "7e1add0cbf458879553a360c905439a7cacfbbd9c5b76d2128bf808a1a7058c1",
   "platform_sha256": "378dbc14e4dda2a3d833f0f238441c55efda7224b2f969dec7710ed2602532de",
   "command": [
     "make",
     "formal-readiness-check"
   ],
-  "started_utc": "2026-09-19T15:36:36.938846+00:00",
-  "finished_utc": "2026-09-19T15:42:45.048725+00:00",
-  "archive": "evidence/formal_readiness/20260919T153636938875Z.tar.gz",
-  "archive_sha256": "f9595377afb763c84f2c2a23c06160269597f8df8be878195387d5c44bde85e5",
-  "manifest_sha256": "fdbb30a94a93e802032ad12944ad992014bc470de2ea62b59016c9f54cfa0eb2",
+  "started_utc": "2026-09-19T16:02:43.452202+00:00",
+  "finished_utc": "2026-09-19T16:08:56.349043+00:00",
+  "archive": "evidence/formal_readiness/20260919T160243452234Z.tar.gz",
+  "archive_sha256": "2e7837fd98b49e82eb8860309dc07153da0b3246f9ecb1c6d8026da9904110ac",
+  "manifest_sha256": "afd7768e67474d9c81e2b507cd018868b918a522e99f5e5861a983b391a1225d",
   "metrics": {
     "portability_mutations": 6,
     "portability_covers": 3,
@@ -30,7 +30,7 @@
     "rename_covers": 9,
     "rename_bmc_depth": 12,
     "measured_commands": 29,
-    "max_rss_kib": 421536,
-    "job_duration_seconds": 400.957088
+    "max_rss_kib": 422336,
+    "job_duration_seconds": 408.998386
   }
 }

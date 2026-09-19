@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "profile": "two_wide_integer_execution",
+  "queue_entries": 16,
+  "rob_entries": 32,
+  "physical_registers": 64,
+  "identity_bits": 13,
+  "producer_slots": 2,
+  "sources": [
+    "rtl/generated/platform_pkg.sv",
+    "rtl/core/single_lane_pkg.sv",
+    "rtl/frontend/decode_single.sv",
+    "rtl/execute/execute_single.sv",
+    "rtl/generated/commit_event_pkg.sv",
+    "rtl/backend/rename_bundle.sv",
+    "rtl/backend/rename_state.sv",
+    "rtl/backend/rename_checkpoints.sv",
+    "rtl/backend/rename_recovery.sv",
+    "rtl/backend/rob_two_wide.sv",
+    "rtl/backend/prf_4r2w.sv",
+    "rtl/backend/backend_two_wide.sv",
+    "rtl/backend/issue_queue.sv",
+    "rtl/backend/issue_backend.sv",
+    "rtl/execute/alu_pipeline.sv",
+    "rtl/backend/integer_backend.sv"
+  ],
+  "lint_config": "config/integer_backend.vlt",
+  "dispatch": "Two externally supplied aligned instruction/PC lanes use the existing decode, rename, ROB and IQ. Supported instructions are RV32I LUI, AUIPC, OP-IMM and OP arithmetic/logical encodings. supported_o reports capability independent of valid_i. Any unsupported instruction or misaligned PC in an offered packed prefix stalls the entire prefix; no partial acceptance or architectural trap is synthesized. The future frontend/decoder must route other operations to their own paths. allocate_accept_o is the only transfer authority; source inputs may change when no lane is accepted.",
+  "execution": "Two existing combinational execute_single datapaths each feed a one-entry result holding register. execution_ready_i independently gates each issue port. Each holding register may consume an accepted completion and capture a fresh launch in the same cycle. New launches are visible for completion only after the rising edge. This permits up to two launches/completions per cycle after fill; dependency wakeup and PRF reads use the same accepted held result.",
+  "completion": "completion_valid_o, completion_id_o and completion_event_o expose held results. completion_enable_i reserves this cycle's two writeback slots, modeled as external grants. Only backend completion_accept_o releases a holding register; a denied grant holds the identity and every event bit stable. A destination x0 still completes and retires but produces no PRF write. Producer port zero maps to completion slot zero and likewise for port one. Arbitration against LSU or other producers is not implemented.",
+  "recovery": "Synchronous reset and full-window flush suppress launch/completion/retirement and discard both held results with all speculative backend state. Flush preserves committed registers and event order; reset leaves nonzero GPR payload unspecified and resets event order. drained_i is a caller-coordinated empty ROB/IQ/producer transaction with no offered instruction/completion traffic. Exhaustion does not silently wrap identities. There are no branch producers or selective recovery inputs in this integer-only integration.",
+  "events": "Producer events capture instruction, PC before/after, architectural source addresses and consumed PRF values, destination and computed result. Unused source fields read p0. x0 destination fields are zero. Privilege is M, memory/CSR/trap effects are zero. The ROB supplies architectural order and retirement validity. Initial nonzero registers are ready but have unspecified payload; regressions initialize them before use.",
+  "lint": "Only unused outputs at the two new module boundaries, unused generated platform constants, and unused fields of execute_single.decoded_i are waived through the checked-in scoped .vlt file. No combinational-loop or width warnings are waived.",
+  "scope": "Connected two-wide integer execution with synthetic instruction/PC supply, real PRF operands, registered computed results, wakeup and in-order retirement. Not a complete processor: no fetch, branch/jump execution, predictor, LSU, memory operations, CSR/trap head controller, multi-producer arbitration, selective producer cancellation, architectural-suite promotion of this top, integrated formal proof or physical timing closure. FPGA is outside project scope; the post-verification clock review and LibreLane GDSII path remain future gates.",
+  "seeds": [
+    1,
+    42,
+    20260919
+  ],
+  "random_cycles_per_seed": 20000,
+  "directed_cycles": 5439
+}
