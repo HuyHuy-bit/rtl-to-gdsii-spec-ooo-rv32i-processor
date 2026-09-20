@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "profile": "redirect_safe_two_wide_fetch_transport",
+  "sources": [
+    "rtl/generated/platform_pkg.sv",
+    "rtl/generated/memory_protocol_pkg.sv",
+    "rtl/core/single_lane_pkg.sv",
+    "rtl/frontend/fetch_two_wide.sv"
+  ],
+  "lint_config": "config/fetch_two_wide.vlt",
+  "line_bytes": 32,
+  "outstanding": 1,
+  "lanes": 2,
+  "seeds": [1, 42, 20260920],
+  "random_cycles_per_seed": 20000,
+  "scope": "Standalone sequential two-wide fetch transport using the existing instruction memory protocol and executable BRAM map. Not yet connected to control_flow_backend. No predictor, predecode, cache lookup/replacement, cross-line pair assembly, architectural trap delivery, full-core acceptance or timing claim. A returned line is a temporary streaming buffer, not a cache. FPGA is excluded; CLK0 and LibreLane remain later gates.",
+  "supply": "Reset begins at platform RESET_PC. enable_i permits creation of a new request or local fault only; disabling does not cancel offered/accepted traffic or hide buffered output. A registered line-aligned request reads one 32-byte line. Up to two consecutive RV32I words are offered oldest first, with only lane zero valid at the last word of a line. take_i is an accepted prefix (00, 01, or 11) and must be a subset of valid_o. Partial consumption retains the remaining words. No response-to-output bypass or request turnover in a response cycle. No next-line request until the current line is consumed. Data and request payloads are not reset; validity controls their use.",
+  "redirect": "redirect_i is an already-selected redirect accepted every non-reset, non-fatal cycle, suppressing instruction validity immediately. It discards buffered/fault state and sets the next demanded PC. An offered request remains valid and bit-stable until handshake, even if not previously accepted. Offered and accepted stale reads are drained with their ID retained until response handshake; stale successful data and access faults are discarded. Multiple redirects retain the latest PC without issuing another request. A redirect coincident with a response discards that response. There is no epoch wrap because no new request starts until old ownership ends. Reset instead clears ownership under the protocol's target-reset contract.",
+  "faults": "An unaligned demand produces one fault token with cause 0, taking priority over executable-region permission. A non-executable aligned demand or live access-fault response produces cause 1. Fault tokens use lane zero, instruction zero, and the faulting PC (also the future trap value). After acceptance, fetch stops until redirect or reset. These are frontend fault tokens, not finalized architectural commit events; backend fault insertion and trap service remain future work.",
+  "protocol": "Requests use all-zero fields except the line-aligned address and four-bit transaction ID. busy_o covers both an offered and an accepted request, including stale traffic. IDs advance only after a well-formed response, including discarded responses, and may wrap after ownership ends. Unexpected response, wrong ID, nonzero uncached payload, nonzero data on access fault, or reserved/protocol-error status sets sticky fatal_o on the next edge, including stale traffic. Fatal suppresses all channels until reset. Responses have minimum one-cycle latency; same-cycle request/response is malformed. The target must uphold the existing reset and hold rules.",
+  "integration": "The future adapter supplies sequential predicted next PC and not-taken metadata until prediction is added, consumes only the backend's accepted prefix, and routes a winning recovery to redirect_i. It must suppress take_i during redirects/reset/fatal, route fault tokens to a precise ROB fault path, and include busy_o plus local frontend occupancy in drain coordination. This task does not supply that adapter or change existing backend RTL.",
+  "lint": "Only unused constants in generated packages are waived; no width, latch or combinational-loop warning is waived. Assertion-disabled mutation builds permit constants/signals made unused by the injected fault."
+}
