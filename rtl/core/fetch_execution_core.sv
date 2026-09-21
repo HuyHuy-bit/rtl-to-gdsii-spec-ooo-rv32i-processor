@@ -1,5 +1,5 @@
 `default_nettype none
-module fetch_execution_core (
+module fetch_execution_core #(parameter bit FRONTEND_FAULTS = 1) (
   input wire clk_i, rst_i, enable_i, flush_i, drained_i,
   input wire [31:0] flush_pc_i,
   output wire request_valid_o,
@@ -23,14 +23,26 @@ module fetch_execution_core (
   output wire [5:0] occupancy_o,
   output wire identity_drain_o, fatal_o
 );
-  wire [1:0] supported, backend_valid;
+  wire [1:0] supported, backend_valid, frontend_fault;
+  wire [63:0] frontend_cause, frontend_value;
+  if (FRONTEND_FAULTS) begin : faults
+    frontend_fault_decode decode (
+      .valid_i(fetch_valid_o), .instruction_i(fetch_instruction_o), .pc_i(fetch_pc_o),
+      .fetch_fault_i(fetch_fault_o), .fetch_cause_i(fetch_fault_cause_o),
+      .fault_o(frontend_fault), .cause_o(frontend_cause), .value_o(frontend_value)
+    );
+  end else begin : no_faults
+    assign frontend_fault = 0;
+    assign frontend_cause = 0;
+    assign frontend_value = 0;
+  end
   wire [63:0] predicted_pc = {fetch_pc_o[63:32] + 32'd4, fetch_pc_o[31:0] + 32'd4};
   wire branch_redirect;
   wire [31:0] branch_pc;
   wire running = !rst_i && !fatal_o;
   assign redirect_o = running && (flush_i || branch_redirect);
   assign redirect_pc_o = flush_i ? flush_pc_i : branch_pc;
-  assign backend_valid = fetch_valid_o & {2{running && !fetch_fault_o && !drained_i}};
+  assign backend_valid = fetch_valid_o & {2{running && (FRONTEND_FAULTS || !fetch_fault_o) && !drained_i}};
   assign unsupported_o = fetch_valid_o & ~supported & {2{!fetch_fault_o}};
 
   fetch_two_wide frontend (
@@ -44,6 +56,7 @@ module fetch_execution_core (
   control_flow_backend backend (
     .clk_i, .rst_i, .flush_i(flush_i && running), .drained_i,
     .valid_i(backend_valid), .instruction_i(fetch_instruction_o), .pc_i(fetch_pc_o),
+    .frontend_fault_i(frontend_fault), .frontend_cause_i(frontend_cause), .frontend_value_i(frontend_value),
     .predicted_pc_i(predicted_pc), .predicted_taken_i(2'b00),
     .supported_o(supported), .allocate_accept_o(dispatch_o), .allocate_id_o(),
     .execution_ready_i(execution_ready_i & {2{running}}),

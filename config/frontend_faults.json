@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "profile": "two_wide_frontend_fault_insertion",
+  "sources": [
+    "rtl/generated/platform_pkg.sv",
+    "rtl/generated/memory_protocol_pkg.sv",
+    "rtl/core/single_lane_pkg.sv",
+    "rtl/frontend/decode_single.sv",
+    "rtl/execute/execute_single.sv",
+    "rtl/generated/commit_event_pkg.sv",
+    "rtl/backend/rename_bundle.sv",
+    "rtl/backend/rename_state.sv",
+    "rtl/backend/rename_checkpoints.sv",
+    "rtl/backend/rename_recovery.sv",
+    "rtl/backend/rob_two_wide.sv",
+    "rtl/backend/prf_4r2w.sv",
+    "rtl/backend/backend_two_wide.sv",
+    "rtl/backend/issue_queue.sv",
+    "rtl/backend/issue_backend.sv",
+    "rtl/execute/alu_pipeline.sv",
+    "rtl/execute/control_flow_pipeline.sv",
+    "rtl/backend/control_flow_backend.sv",
+    "rtl/frontend/fetch_two_wide.sv",
+    "rtl/frontend/frontend_fault_decode.sv",
+    "rtl/core/fetch_execution_core.sv"
+  ],
+  "lint_config": "config/fetch_execution_core.vlt",
+  "seeds": [
+    1,
+    42,
+    20260920
+  ],
+  "scope": "Fetch access/alignment faults and illegal encodings reserve resultless ROB/IQ entries and complete as ordered raw head-fault candidates. Older branches can squash queued, held or completed younger faults. No architectural trap acceptance, CSR update, handler redirect, LSU, predictor/history, full two-wide architectural-suite acceptance or physical timing claim.",
+  "faults": "FRONTEND_FAULTS=1 is the RTL default. Fetch errors have priority over illegal encoding: cause 0 for alignment, cause 1 for access/PMA, value=faulting PC and instruction=0. Otherwise OP_ILLEGAL becomes cause 2 with original instruction as value. Valid deferred RV32I/Zicsr/Zifencei classes remain unsupported stalls. A fault ends its accepted bundle; a lane-one fault may allocate atomically with an older supported lane. Faults reserve no destination or checkpoint and consume no register operands. A neutral aligned scheduling token uses the normal IQ/producer handshake; saved metadata reconstructs the raw trap event at completion. Original PC is both pc_before and provisional pc_after. All source/destination/memory/CSR effects are zero and retired=0. Every slot allocation overwrites fault membership, including after flush/reset/reuse; metadata payload is not reset. Existing live-generation and recovery checks accept or reject the completion. The head candidate remains held with trap_ready=0; a later head controller must finalize pc_after/CSR effects and accept the trap atomically.",
+  "recovery": "Only branch resolution competes internally. resolve_grant_i gives the caller permission to defer it; accepted branch recovery always has frontend redirect capacity. External flush_i wins and supplies flush_pc_i, restores committed rename state and preserves retirement order. The caller chooses a restart PC consistent with committed state. No multi-event arbiter is claimed.",
+  "flow": "Frontend acceptance is still backend allocation. Fetch error tokens are consumed once into the ROB and fetch then stops pending redirect/reset. Illegal encodings end the bundle but may be followed by speculative younger work; nothing can retire past the head fault. External flush and branch recovery use existing rules. FRONTEND_FAULTS=0 retains the task 13 stall-only profile and is independently regression tested.",
+  "drain": "drained_i remains externally coordinated: enable_i low, no offered/accepted instruction transaction or buffered frontend token, empty backend and no held producers or other identity holders. For generation exhaustion the caller must preserve the committed restart PC, drain outstanding fetch traffic and the backend, flush buffered fetch state with external restart, then pulse drained_i while enable remains low. This top does not automate drain or silently wrap ROB generations.",
+  "parameters": {
+    "FRONTEND_FAULTS": 1
+  }
+}

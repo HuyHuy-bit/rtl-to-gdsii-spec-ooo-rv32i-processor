@@ -248,6 +248,7 @@ public:
             }
         }
         dut.clk_i = 0; dut.rst_i = in.reset; dut.flush_i = in.flush; dut.drained_i = in.drain;
+        dut.frontend_fault_i = 0; dut.frontend_cause_i = 0; dut.frontend_value_i = 0;
         dut.valid_i = wanted; dut.instruction_i = uint64_t(in.insn[0]) | (uint64_t(in.insn[1]) << 32);
         dut.pc_i = uint64_t(in.pc[0]) | (uint64_t(in.pc[1]) << 32);
         dut.predicted_pc_i = uint64_t(in.predicted_pc[0]) | (uint64_t(in.predicted_pc[1]) << 32);

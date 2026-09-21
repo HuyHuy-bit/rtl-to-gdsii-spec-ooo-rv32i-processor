@@ -16,7 +16,7 @@ OSS_CAD_SUITE ?= $(HOME)/tools/oss-cad-suite-20260905/oss-cad-suite
 .PHONY: backend-two-wide-check
 .PHONY: issue-queue-check
 .PHONY: issue-backend-check
-.PHONY: integer-backend-check control-flow-backend-check fetch-two-wide-check fetch-execution-core-check
+.PHONY: integer-backend-check control-flow-backend-check fetch-two-wide-check fetch-execution-core-check frontend-faults-check
 .PHONY: rob-two-wide-check
 .PHONY: rename-bundle-check
 .PHONY: rename-state-check rename-checkpoints-check rename-recovery-check
@@ -42,6 +42,9 @@ issue-queue-check:
 
 issue-backend-check:
 	@python3 tools/run_issue_backend.py --suite "$(OSS_CAD_SUITE)"
+
+frontend-faults-check:
+	@python3 tools/run_frontend_faults.py --suite "$(OSS_CAD_SUITE)"
 
 fetch-execution-core-check:
 	@python3 tools/run_fetch_execution_core.py --suite "$(OSS_CAD_SUITE)"
