@@ -1,5 +1,5 @@
 `default_nettype none
-module fetch_execution_core #(parameter bit FRONTEND_FAULTS = 1) (
+module fetch_execution_core #(parameter bit FRONTEND_FAULTS = 1, parameter bit TRAP_SERVICE = 1) (
   input wire clk_i, rst_i, enable_i, flush_i, drained_i,
   input wire [31:0] flush_pc_i,
   output wire request_valid_o,
@@ -18,6 +18,9 @@ module fetch_execution_core #(parameter bit FRONTEND_FAULTS = 1) (
   output wire [63:0] fetch_pc_o, fetch_instruction_o,
   output wire fetch_busy_o, fetch_fault_o,
   output wire [31:0] fetch_fault_cause_o,
+  input wire trap_ready_i,
+  output wire trap_valid_o, trap_accept_o,
+  output commit_event_pkg::commit_event_t trap_event_o,
   output wire backend_fault_o,
   output commit_event_pkg::commit_event_t backend_fault_event_o,
   output wire [5:0] occupancy_o,
@@ -37,13 +40,26 @@ module fetch_execution_core #(parameter bit FRONTEND_FAULTS = 1) (
     assign frontend_value = 0;
   end
   wire [63:0] predicted_pc = {fetch_pc_o[63:32] + 32'd4, fetch_pc_o[31:0] + 32'd4};
-  wire branch_redirect;
+  wire branch_redirect, backend_trap_accept;
   wire [31:0] branch_pc;
   wire running = !rst_i && !fatal_o;
-  assign redirect_o = running && (flush_i || branch_redirect);
-  assign redirect_pc_o = flush_i ? flush_pc_i : branch_pc;
+  assign redirect_o = running && (flush_i || trap_accept_o || branch_redirect);
+  assign redirect_pc_o = flush_i ? flush_pc_i : trap_accept_o ? trap_event_o.pc_after : branch_pc;
   assign backend_valid = fetch_valid_o & {2{running && (FRONTEND_FAULTS || !fetch_fault_o) && !drained_i}};
   assign unsupported_o = fetch_valid_o & ~supported & {2{!fetch_fault_o}};
+
+  if (TRAP_SERVICE) begin : traps
+    head_trap_controller head (
+      .clk_i, .rst_i, .cancel_i(flush_i || !running),
+      .retire_count_i(2'($countones(retire_accept_o))),
+      .fault_valid_i(backend_fault_o), .fault_event_i(backend_fault_event_o),
+      .trap_valid_o, .trap_ready_i, .trap_accept_o, .trap_event_o
+    );
+  end else begin : no_traps
+    assign trap_valid_o = 0;
+    assign trap_accept_o = 0;
+    assign trap_event_o = '0;
+  end
 
   fetch_two_wide frontend (
     .clk_i, .rst_i, .enable_i(enable_i && !drained_i),
@@ -61,18 +77,23 @@ module fetch_execution_core #(parameter bit FRONTEND_FAULTS = 1) (
     .supported_o(supported), .allocate_accept_o(dispatch_o), .allocate_id_o(),
     .execution_ready_i(execution_ready_i & {2{running}}),
     .completion_enable_i(completion_enable_i & {2{running}}),
-    .retire_ready_i(retire_ready_i & {2{running}}), .resolve_grant_i(resolve_grant_i && running),
+    .retire_ready_i(retire_ready_i & {2{running}}), .resolve_grant_i(resolve_grant_i && running && !(TRAP_SERVICE && backend_fault_o)),
     .resolve_valid_o(), .resolve_accept_o(), .resolve_taken_o(), .resolve_mispredict_o(),
     .resolve_id_o(), .resolve_pc_o(branch_pc), .redirect_o(branch_redirect),
     .issue_o(), .producer_busy_o, .issue_id_o(),
     .completion_valid_o(), .completion_accept_o(), .wb_accept_o(), .completion_id_o(), .completion_event_o(),
     .retire_valid_o, .retire_accept_o, .retire_event_o,
+    .trap_ready_i(trap_accept_o), .trap_accept_o(backend_trap_accept),
     .fault_pending_o(backend_fault_o), .fault_event_o(backend_fault_event_o),
     .head_id_o(), .occupancy_o, .issue_occupancy_o(), .checkpoint_valid_o(), .identity_drain_o
   );
 `ifndef SYNTHESIS
   always_ff @(posedge clk_i) begin
     if (!rst_i) begin
+      assert (trap_accept_o == backend_trap_accept)
+        else $fatal(1, "FETCH_CORE_TRAP_ATOMIC");
+      assert (!trap_accept_o || (redirect_o && !branch_redirect && retire_accept_o == 0))
+        else $fatal(1, "FETCH_CORE_TRAP_RECOVERY");
       assert (!drained_i || (!enable_i && !fetch_busy_o && fetch_valid_o == 0 && !fatal_o))
         else $fatal(1, "FETCH_CORE_DRAIN");
       assert (!redirect_o || (dispatch_o == 0 && retire_accept_o == 0))

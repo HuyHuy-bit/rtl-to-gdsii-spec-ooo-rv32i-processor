@@ -126,7 +126,7 @@ def main():
         'lost_fault_target': ('control_flow_pipeline.sv', 'built.trap_value = trap_value;', "built.trap_value = 32'd0;"),
         'lost_result_hold': ('control_flow_pipeline.sv', 'if (take_i) pending_q <= 0;', 'pending_q <= 0;'),
         'lost_full_flush': ('control_flow_pipeline.sv', 'if (rst_i || flush_i) begin', 'if (rst_i) begin'),
-        'lost_selective_cancel': ('control_flow_backend.sv', '.flush_i(flush_i || cancel_alu1)', '.flush_i(flush_i)'),
+        'lost_selective_cancel': ('control_flow_backend.sv', '.flush_i(producer_flush || cancel_alu1)', '.flush_i(producer_flush)'),
         'raw_slot_age': ('control_flow_backend.sv', "5'(completion_id_o[17:13] - head_id_o[4:0])\n      > 5'(resolve_id_o[4:0] - head_id_o[4:0])", 'completion_id_o[17:13] > resolve_id_o[4:0]'),
         'cancel_before_grant': ('control_flow_backend.sv', 'wire cancel_alu1 = redirect_o &&', 'wire cancel_alu1 = resolve_valid_o && resolve_mispredict_o &&'),
         'cancel_older': ('control_flow_backend.sv', "> 5'(resolve_id_o[4:0] - head_id_o[4:0])", "< 5'(resolve_id_o[4:0] - head_id_o[4:0])"),

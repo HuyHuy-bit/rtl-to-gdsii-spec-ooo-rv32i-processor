@@ -22,6 +22,8 @@
     "rtl/backend/control_flow_backend.sv",
     "rtl/frontend/fetch_two_wide.sv",
     "rtl/frontend/frontend_fault_decode.sv",
+    "rtl/core/csr_two_wide.sv",
+    "rtl/core/head_trap_controller.sv",
     "rtl/core/fetch_execution_core.sv"
   ],
   "lint_config": "config/fetch_execution_core.vlt",
@@ -30,12 +32,13 @@
     42,
     20260920
   ],
-  "scope": "Instruction-memory-connected integer/branch/jump execution subset. Sequential not-taken supply, held line traffic and branch recovery, full-window external restart. No predictor/history, CSR/trap service, load/store execution, cache, architectural-suite acceptance of this top or clock claim. This acceptance profile pins FRONTEND_FAULTS=0; the enabled fault-insertion profile is checked separately.",
+  "scope": "Instruction-memory-connected integer/branch/jump execution subset. Sequential not-taken supply, held line traffic and branch recovery, full-window external restart. No predictor/history, CSR/trap service, load/store execution, cache, architectural-suite acceptance of this top or clock claim. This acceptance profile pins FRONTEND_FAULTS=0; the enabled fault-insertion profile is checked separately. This historical profile pins TRAP_SERVICE=0; architectural trap acceptance is checked separately.",
   "faults": "Frontend fault tokens and unsupported instructions stall fetch-to-dispatch. Backend target-alignment faults remain held raw ROB-head candidates. None is converted into a finalized trap event; they require future precise fault insertion/head control. Younger fetch faults may be discarded by older branch recovery. unsupported_o marks raw unsupported valid lanes, including a tail ignored behind lane-zero CFI.",
   "recovery": "Only branch resolution competes internally. resolve_grant_i gives the caller permission to defer it; accepted branch recovery always has frontend redirect capacity. External flush_i wins and supplies flush_pc_i, restores committed rename state and preserves retirement order. The caller chooses a restart PC consistent with committed state. No multi-event arbiter is claimed.",
   "flow": "Frontend take is exactly backend allocation acceptance. Backend predictions are not-taken with each lane PC+4. enable_i only controls new fetch demand. Fetch faults never enter the supported-instruction decoder. Sticky instruction-protocol fatal disables dispatch, issue, completion grants, resolution and retirement until reset; it is not a precise trap.",
   "drain": "drained_i remains externally coordinated: enable_i low, no offered/accepted instruction transaction or buffered frontend token, empty backend and no held producers or other identity holders. For generation exhaustion the caller must preserve the committed restart PC, drain outstanding fetch traffic and the backend, flush buffered fetch state with external restart, then pulse drained_i while enable remains low. This top does not automate drain or silently wrap ROB generations.",
   "parameters": {
-    "FRONTEND_FAULTS": 0
+    "FRONTEND_FAULTS": 0,
+    "TRAP_SERVICE": 0
   }
 }

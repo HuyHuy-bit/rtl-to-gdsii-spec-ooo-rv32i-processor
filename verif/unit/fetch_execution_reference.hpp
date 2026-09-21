@@ -120,7 +120,7 @@ struct Input {
     bool reset=false, enable=true, flush=false, drain=false, grant=true, request_ready=true;
     uint32_t target=0;
     unsigned execute=3, complete=3, retire=3, latency=1;
-    bool inject_bad=false;
+    bool inject_bad=false, trap_ready=false;
 };
 struct Expected { Event event{}; unsigned op, rd; uint32_t result, next_pc; bool fault, taken=false; };
 struct Bench {
@@ -129,7 +129,9 @@ struct Bench {
     std::array<uint32_t,32> regs{};
     std::array<bool,32> known{};
     std::map<std::string,unsigned> coverage;
-    bool fault_support=false;
+    bool fault_support=false, trap_service=false;
+    std::array<uint32_t,4> trap_csrs{0x1800,0,0,0};
+    unsigned traps=0;
     unsigned cycles=0, retired=0, requests=0, expected_id=0, pending_id=0, delay=0;
     uint32_t pc=0, pending_address=0, error_address=UINT32_MAX;
     uint64_t order=0;
@@ -195,7 +197,26 @@ struct Bench {
         for (unsigned n=0; n<EVENT_BITS; ++n)
             require(bit(actual,offset+n)==bit(want,n),"architectural event bit "+std::to_string(n)+" PC="+std::to_string(pc));
     }
+    Event finalized_fault() {
+        auto raw=expected(); require(raw.fault,"trap without reference fault");
+        auto e=raw.event;
+        put(e,PC_AFTER_OFFSET,32,0x100);
+        const unsigned addresses[4]={0x300,0x341,0x342,0x343};
+        const uint32_t masks[4]={0x88,0xfffffffc,0xffffffff,0xffffffff};
+        const uint32_t reads[4]={0x1888,0xffffffff,0xffffffff,0xffffffff};
+        const uint32_t values[4]={(trap_csrs[0]&~0x88U)|((trap_csrs[0]&8U)<<4),pc&~3U,
+            get(e,TRAP_CAUSE_OFFSET,32),get(e,TRAP_VALUE_OFFSET,32)};
+        for (unsigned n=0;n<4;n++) {
+            const unsigned base=n*CSR_EFFECT_BITS;
+            put(e,base+CSR_VALID_OFFSET,1,1); put(e,base+CSR_ADDRESS_OFFSET,12,addresses[n]);
+            put(e,base+CSR_OLD_VALUE_OFFSET,32,trap_csrs[n]); put(e,base+CSR_NEW_VALUE_OFFSET,32,values[n]);
+            put(e,base+CSR_READ_MASK_OFFSET,32,reads[n]); put(e,base+CSR_WRITE_MASK_OFFSET,32,masks[n]);
+            put(e,base+CSR_MASK_REASON_OFFSET,3,2);
+        }
+        return e;
+    }
     void tick(Input i={}) {
+        d.trap_ready_i=i.trap_ready;
         d.clk_i=0; d.rst_i=i.reset; d.enable_i=i.enable; d.flush_i=i.flush; d.flush_pc_i=i.target;
         d.drained_i=i.drain; d.resolve_grant_i=i.grant; d.execution_ready_i=i.execute;
         d.completion_enable_i=i.complete; d.retire_ready_i=i.retire; d.request_ready_i=i.request_ready;
@@ -211,6 +232,7 @@ struct Bench {
         if (i.reset) {
             require(!d.request_valid_o && !d.response_ready_o && !d.dispatch_o && !d.retire_accept_o && !d.redirect_o,"reset outputs");
             pending=held=fatal=false; pc=0; order=0; expected_id=0; known.fill(false); known[0]=true; regs[0]=0;
+            trap_csrs={0x1800,0,0,0};
             coverage["reset"]++;
         } else {
             require(bool(d.fatal_o)==fatal,"fatal state");
@@ -220,8 +242,8 @@ struct Bench {
             }
             if (d.redirect_o) {
                 require(!d.dispatch_o && !d.retire_accept_o,"redirect atomicity");
-                require(i.flush || i.grant,"redirect without grant");
-                if (!i.flush) coverage["branch_redirect"]++;
+                require(i.flush || d.trap_accept_o || i.grant,"redirect without grant");
+                if (!i.flush && !d.trap_accept_o) coverage["branch_redirect"]++;
                 if (pending) coverage["redirect_pending"]++;
                 if (held) coverage["redirect_request_stall"]++;
             }
@@ -289,6 +311,19 @@ struct Bench {
                 auto e=expected(); require(e.fault,"unexpected head fault"); compare(d.backend_fault_event_o,0,e.event);
                 coverage["backend_fault"]++;
             }
+            require(bool(d.trap_accept_o)==(bool(d.trap_valid_o) && i.trap_ready),"trap handshake");
+            if (d.trap_valid_o) {
+                require(trap_service && !i.flush && !d.fatal_o && d.backend_fault_o,"unexpected trap offer");
+                require(!d.retire_accept_o,"trap overlaps retirement");
+                const auto e=finalized_fault(); compare(d.trap_event_o,0,e);
+                if (d.trap_accept_o) {
+                    require(d.redirect_o && d.redirect_pc_o==0x100 && !d.dispatch_o,"trap redirect atomicity");
+                    for (unsigned n=0;n<4;n++) trap_csrs[n]=get(e,n*CSR_EFFECT_BITS+CSR_NEW_VALUE_OFFSET,32);
+                    ++order; ++traps; pc=0x100; coverage["trap_accept"]++;
+                } else coverage["trap_stall"]++;
+            } else for (unsigned n=0;n<EVENT_BITS;n++) require(!bit(d.trap_event_o,n),"invalid trap payload");
+            if (trap_service && d.backend_fault_o && !i.flush && !d.trap_accept_o)
+                require(!d.redirect_o,"younger redirect bypassed head fault");
             if (i.drain) coverage["drain"]++;
         }
         d.clk_i=1; d.eval(); ++cycles;

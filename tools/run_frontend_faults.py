@@ -24,7 +24,7 @@ def main():
     parser.add_argument('--suite', type=Path, default=Path.home()/'tools/oss-cad-suite-20260905/oss-cad-suite')
     args = parser.parse_args()
     config = json.loads((ROOT/'config/frontend_faults.json').read_text())
-    if config['parameters'] != {'FRONTEND_FAULTS': 1}:
+    if config['parameters'] != {'FRONTEND_FAULTS': 1, 'TRAP_SERVICE': 0}:
         raise RuntimeError('fault profile requires frontend faults enabled')
     OUT.mkdir(parents=True, exist_ok=True)
     retained = ROOT/'evidence/receipts/frontend_faults.json'
@@ -70,8 +70,13 @@ def main():
     (OUT/'fetch_memory_layout.hpp').write_text('\n'.join(fields)+'\n')
     artifacts.add(OUT/'fetch_memory_layout.hpp')
     schema = json.loads((ROOT/'config/commit_event.yaml').read_text())
-    offset = sum(f['width'] for f in schema['csr_fields'])*schema['max_csr_effects']
+    offset = 0
     fields = []
+    for field in reversed(schema['csr_fields']):
+        fields.append(f'constexpr unsigned CSR_{field["name"].upper()}_OFFSET = {offset};')
+        offset += field['width']
+    fields.append(f'constexpr unsigned CSR_EFFECT_BITS = {offset};')
+    offset *= schema['max_csr_effects']
     for field in reversed(schema['slot_fields']):
         fields.append(f'constexpr unsigned {field["name"].upper()}_OFFSET = {offset};')
         offset += field['width']
@@ -83,12 +88,12 @@ def main():
     def build(source_list, directory, log, mutated=False):
         run(['verilator', '--cc', '--exe', '--build', '--build-jobs', '2', '--Wall', '--assert',
              *(['-DSYNTHESIS', '-Wno-UNUSEDSIGNAL', '-Wno-UNUSEDPARAM'] if mutated else []),
-             '--top-module', 'fetch_execution_core', '-GFRONTEND_FAULTS=1', '--Mdir', directory,
+             '--top-module', 'fetch_execution_core', '-GFRONTEND_FAULTS=1', '-GTRAP_SERVICE=0', '--Mdir', directory,
              '-CFLAGS', f'-std=c++17 -Wall -Wextra -Werror -I{OUT}', lint_config, *source_list,
              ROOT/'verif/unit/frontend_faults_tb.cpp', '-o', 'frontend_faults_check'], log)
         return directory/'frontend_faults_check'
 
-    run(['verilator', '--lint-only', '--Wall', '--assert', '--top-module', 'fetch_execution_core', '-GFRONTEND_FAULTS=1',
+    run(['verilator', '--lint-only', '--Wall', '--assert', '--top-module', 'fetch_execution_core', '-GFRONTEND_FAULTS=1', '-GTRAP_SERVICE=0',
          lint_config, *sources], 'lint.log')
     binary = build(sources, OUT/'obj_dir', 'build.log')
     required = {'backend_fault', 'completion_stall', 'retire_stall', 'dual_dispatch', 'dual_retire',
@@ -122,7 +127,7 @@ def main():
         'fetch_fault_blocked': ('fetch_execution_core.sv', '(FRONTEND_FAULTS || !fetch_fault_o)', '!fetch_fault_o'),
         'fetch_fault_priority_lost': ('frontend_fault_decode.sv', 'fetch_fault_i ? fetch_cause_i : CAUSE_ILLEGAL_INSTRUCTION', 'CAUSE_ILLEGAL_INSTRUCTION'),
         'deferred_legal_trapped': ('frontend_fault_decode.sv', 'decoded[lane].op == OP_ILLEGAL', '!(decoded[lane].op inside {OP_ALU, OP_LUI, OP_AUIPC, OP_BRANCH, OP_JAL, OP_JALR})'),
-        'younger_held_fault_survives': ('control_flow_backend.sv', '.flush_i(flush_i || cancel_alu1)', '.flush_i(flush_i)'),
+        'younger_held_fault_survives': ('control_flow_backend.sv', '.flush_i(producer_flush || cancel_alu1)', '.flush_i(producer_flush)'),
     }
     for name, (filename, old, new) in mutations.items():
         rtl = next(p for p in sources if p.name == filename)
@@ -137,7 +142,7 @@ def main():
         run([executable, '1'], name+'.log', failure='fetch execution core mismatch')
         print(f'Frontend fault mutation {name}: PASS (detected)', flush=True)
     script = OUT/'synth.ys'
-    script.write_text('plugin -i slang\nread_slang --top fetch_execution_core -G FRONTEND_FAULTS=1 '+' '.join(str(p) for p in sources)+'\n'
+    script.write_text('plugin -i slang\nread_slang --top fetch_execution_core -G FRONTEND_FAULTS=1 -G TRAP_SERVICE=0 '+' '.join(str(p) for p in sources)+'\n'
                       f'synth -top fetch_execution_core -flatten\ncheck -assert\nwrite_json {OUT/"synth.json"}\n')
     artifacts.update([script, OUT/'synth.json'])
     run([suite/'bin/yosys', '-s', script], 'synth.log')
