@@ -20,6 +20,10 @@ module rob_two_wide (
   output logic [9:0] retire_rd_o,
   output logic [11:0] retire_destination_o, retire_stale_o,
   output commit_event_pkg::commit_event_t [1:0] retire_event_o,
+  input wire serial_offer_i,
+  input wire [12:0] serial_id_i,
+  input commit_event_pkg::commit_event_t serial_event_i,
+  output wire serial_ready_o, serial_accept_o,
   input wire trap_take_i,
   output logic trap_valid_o, trap_accept_o,
   output commit_event_pkg::commit_event_t trap_event_o,
@@ -57,6 +61,14 @@ module rob_two_wide (
   assign head_pc_o = pc_q[head_q];
   assign head_id_o = {generation_q[head_q], head_q};
   assign clear_window = flush_i || trap_accept_o;
+  wire serial_selected = serial_offer_i && serial_ready_o;
+  assign serial_ready_o = head_valid_o && !clear_window && !branch_recover_o && !drained_i
+      && !done_q[head_q] && solo_q[head_q] && !cfi_q[head_q] && serial_id_i == head_id_o
+      && serial_event_i.valid && serial_event_i.retired && !serial_event_i.trap
+      && serial_event_i.pc_before == pc_q[head_q] && serial_event_i.rd_addr == rd_q[head_q]
+      && serial_event_i.rd_write_mask == (rd_q[head_q] == 0 ? 32'd0 : 32'hffffffff)
+      && (rd_q[head_q] != 0 || serial_event_i.rd_value == 0);
+  assign serial_accept_o = serial_selected && retire_accept_o[0];
 
   assign trap_valid_o = head_valid_o && done_q[head_q] && event_q[head_q].trap;
   assign trap_accept_o = trap_valid_o && trap_take_i;
@@ -75,7 +87,7 @@ module rob_two_wide (
   assign allocate_id_o = {{next_generation_q[second_tail], second_tail}, {next_generation_q[tail_q], tail_q}};
   always_comb begin
     allocate_ready_o = 0;
-    if (!rst_i && !clear_window && !branch_recover_o && !drained_i) begin
+    if (!rst_i && !clear_window && !branch_recover_o && !drained_i && !serial_selected) begin
       allocate_ready_o[0] = count_q < 32 && !exhausted_q[tail_q];
       allocate_ready_o[1] = allocate_ready_o[0] && count_q < 31 && !exhausted_q[second_tail];
     end
@@ -88,7 +100,7 @@ module rob_two_wide (
     complete_destination_o = 0;
     for (int lane = 0; lane < 2; lane++) begin
       complete_destination_o[lane*6 +: 6] = destination_q[complete_id_i[lane*13 +: 5]];
-      complete_ready_o[lane] = !rst_i && !clear_window && valid_q[complete_id_i[lane*13 +: 5]]
+      complete_ready_o[lane] = !rst_i && !clear_window && !serial_selected && valid_q[complete_id_i[lane*13 +: 5]]
         && generation_q[complete_id_i[lane*13 +: 5]] == complete_id_i[lane*13+5 +: 8]
         && !done_q[complete_id_i[lane*13 +: 5]]
         && (!branch_recover_o || 5'(complete_id_i[lane*13 +: 5] - head_q) <= resolve_age);
@@ -102,8 +114,8 @@ module rob_two_wide (
 
     retire_valid_o = 0;
     if (!rst_i && !clear_window && !branch_recover_o) begin
-      retire_valid_o[0] = count_q != 0 && done_q[head_q] && !event_q[head_q].trap
-        && (!cfi_q[head_q] || resolved_q[head_q]);
+      retire_valid_o[0] = serial_selected || (count_q != 0 && done_q[head_q] && !event_q[head_q].trap
+        && (!cfi_q[head_q] || resolved_q[head_q]));
       retire_valid_o[1] = retire_valid_o[0] && count_q > 1 && done_q[second_head]
         && !event_q[second_head].trap && (!cfi_q[second_head] || resolved_q[second_head])
         && !solo_q[head_q] && !solo_q[second_head];
@@ -114,7 +126,7 @@ module rob_two_wide (
     retire_rd_o = {rd_q[second_head], rd_q[head_q]};
     retire_destination_o = {destination_q[second_head], destination_q[head_q]};
     retire_stale_o = {stale_q[second_head], stale_q[head_q]};
-    retire_event_o[0] = event_q[head_q];
+    retire_event_o[0] = serial_selected ? serial_event_i : event_q[head_q];
     retire_event_o[1] = event_q[second_head];
     for (int lane = 0; lane < 2; lane++) begin
       retire_event_o[lane].valid = retire_valid_o[lane];
@@ -201,6 +213,8 @@ module rob_two_wide (
 `ifndef SYNTHESIS
   always_ff @(posedge clk_i) begin
     if (!rst_i) begin
+      assert (!serial_accept_o || (retire_accept_o == 1 && complete_accept_o == 0 && allocate_accept_o == 0))
+        else $fatal(1, "ROB2_SERIAL_ATOMIC");
       assert (count_q <= 32 && $countones(valid_q) == int'(count_q)) else $fatal(1, "ROB2_COUNT");
       for (int slot = 0; slot < 32; slot++)
         assert (valid_q[slot] == (6'(5'(5'(slot) - head_q)) < count_q)) else $fatal(1, "ROB2_WINDOW");

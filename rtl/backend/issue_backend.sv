@@ -47,7 +47,7 @@ module issue_backend (
   output wire [2:0] checkpoint_id_o,
   output wire [7:0] checkpoint_valid_o, checkpoint_released_o
 );
-  wire [1:0] dispatch_ready;
+  wire [1:0] dispatch_ready, unused_serial;
   wire recover = flush_i || trap_accept_o;
 
   // The queue must hold the whole renamed prefix, so its credits join the allocation stall.
@@ -65,6 +65,7 @@ module issue_backend (
     .resolve_accept_o, .branch_recover_o,
     .retire_ready_i, .retire_valid_o, .retire_accept_o, .retire_rd_o,
     .retire_destination_o, .retire_stale_o, .retire_event_o,
+    .serial_offer_i(1'b0), .serial_id_i(13'd0), .serial_event_i('0), .serial_ready_o(unused_serial[0]), .serial_accept_o(unused_serial[1]),
     .trap_ready_i, .trap_valid_o, .trap_accept_o, .trap_event_o,
     .read_address_i(issue_source_o), .read_data_o, .read_ready_o,
     .head_valid_o, .head_id_o, .head_pc_o, .occupancy_o, .identity_drain_o,

@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "profile": "atomic_serial_head_retirement",
+  "sources": [
+    "rtl/generated/commit_event_pkg.sv",
+    "rtl/backend/rename_bundle.sv",
+    "rtl/backend/rename_state.sv",
+    "rtl/backend/rename_checkpoints.sv",
+    "rtl/backend/rename_recovery.sv",
+    "rtl/backend/rob_two_wide.sv",
+    "rtl/backend/prf_4r2w.sv",
+    "rtl/backend/backend_two_wide.sv"
+  ],
+  "seeds": [
+    1,
+    42,
+    20260921
+  ],
+  "scope": "Standalone backend atomic head-result write and retirement. No CSR instruction dispatch, CSR-bank connection, MRET redirect, IQ serialization or full-core acceptance.",
+  "contract": "serial_offer_i supplies a held, final, legal non-trapping event and full ROB identity for an unfinished solo non-CFI head entry. Entry PC, rd address and write mask must match ownership; resultless events have rd_value=0. serial_ready_o reports qualification independent of offer and downstream readiness. Only serial_accept_o authorizes external architectural side effects. It equals the single normal retire acceptance for the selected candidate. Nonzero destination writes and committed-map/stale-tag updates happen on that same edge; no earlier completion or wakeup is permitted. Event order/valid/retired are assigned by the ROB.",
+  "arbitration": "Reset, full flush, accepted trap and branch recovery prevent serial acceptance. A qualified serial offer reserves the retirement lane, blocks ordinary completion on both lanes and blocks allocation even under backpressure. retire_ready_i[0] is joint event-sink and external CSR-side-effect readiness; lane one cannot retire with it. Existing completions resume when the serial offer is withdrawn/accepted. The caller holds the event until acceptance or cancellation and owns upstream serialization/recovery priority.",
+  "integration": "The existing issue_backend explicitly disables this interface. Future CSR head control must capture its renamed source, wait at head, prepare a CSR response and couple serial_accept_o to CSR acceptance. Illegal CSR results use the precise trap path, not this normal-retirement interface. MRET must couple acceptance to frontend redirect. Reset also resets external identity holders; generations must not wrap without existing global drain."
+}

@@ -32,7 +32,7 @@ def main():
     retained.unlink(missing_ok=True)
     receipt = OUT/'receipt.json'
     receipt.unlink(missing_ok=True)
-    paths = [*config['sources'], 'verif/unit/backend_two_wide_tb.cpp', 'config/backend_two_wide.json',
+    paths = [*config['sources'], 'verif/unit/backend_two_wide_tb.cpp', 'verif/unit/backend_reference.hpp', 'config/backend_two_wide.json',
              'config/rob_two_wide.json', 'config/rename_recovery.json', 'config/prf_contract.json',
              'config/commit_event.yaml', 'tools/gen_commit_event.py', 'tools/run_backend_two_wide.py',
              'config/toolchain.lock', 'config/synthesis.lock', 'Makefile']
@@ -103,7 +103,7 @@ def main():
     mutations = {
         'lost_late_solo': ('.complete_solo_i,', ".complete_solo_i(2'b00),"),
         'reclaimed_read_ready': ('&& !reclaim[read_address_i[port_id*6 +: 6]]', ''),
-        'stale_write': ('.wb_live_i(rob_complete_ready)', ".wb_live_i(2'b11)"),
+        'stale_write': ('.wb_live_i(wb_live)', ".wb_live_i(2'b11)"),
         'unqualified_prf': ('.wb_accept_i(wb_accept_o)', '.wb_accept_i(complete_offer_i)'),
         'lost_second_write': ('.wb_accept_i(wb_accept_o)', ".wb_accept_i(wb_accept_o & 2'b01)"),
         'swapped_payload': ('{complete_event_i[1].rd_value, complete_event_i[0].rd_value}', '{complete_event_i[0].rd_value, complete_event_i[1].rd_value}'),

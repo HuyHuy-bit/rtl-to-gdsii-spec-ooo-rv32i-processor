@@ -100,6 +100,8 @@ public:
             cr |= unsigned(ready) << lane;
             ca |= unsigned(ready && c.offer && c.take) << lane;
         }
+        dut.serial_offer_i = 0; dut.serial_id_i = 0;
+        for (unsigned word=0;word<(EVENT_BITS+31)/32;word++) dut.serial_event_i[word]=0;
         dut.clk_i = 0; dut.rst_i = in.reset; dut.flush_i = in.flush; dut.drained_i = in.drain;
         dut.allocate_i = (1U << in.alloc)-1; dut.allocate_cfi_i = in.cfi; dut.allocate_solo_i = in.solo;
         dut.allocate_pc_i = 0;

@@ -17,5 +17,6 @@
     20260912
   ],
   "random_cycles_per_seed": 20000,
-  "directed_cycles": 8543
+  "directed_cycles": 8543,
+  "serial_retirement": "The atomic head interface is defined and verified separately in config/serial_retirement.json. This historical gate keeps serial_offer_i=0."
 }

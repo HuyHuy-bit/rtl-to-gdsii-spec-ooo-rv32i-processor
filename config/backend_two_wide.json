@@ -19,12 +19,13 @@
   "retirement": "retire_valid_o exposes an eligible oldest ROB prefix. retire_ready_i represents joint event-sink and architectural-side-effect readiness; slot one cannot retire without slot zero. retire_accept_o is shared with committed-map updates and stale-tag release. Event valid fields describe offered records, not acceptance; consumers act only on the acceptance mask. trap_ready_i authorizes the separate head trap boundary and must be qualified by the future CSR/event controller. trap_accept_o flushes the ROB and restores pre-cycle committed rename state without destination commit. Event order is supplied by the ROB.",
   "reads": "read_address_i supplies four physical source tags for the future issue stage. read_ready_o includes same-cycle accepted writes and masks reclaimed tags and global recovery. read_data_o bypasses exactly wb_accept_o; it remains an unqualified physical read when readiness is false. p0 always reads zero. Other PRF payloads are unspecified until written and are not reset. source_ready_o describes the accepted rename bundle including lane-zero RAW/WAW bypass and current accepted writebacks.",
   "drain": "drained_i retains the ROB's empty-window/global-producer-quiescence contract. It requires no offered rename, completion or resolution traffic and confirmation that every external holder discarded previous identities. Generation exhaustion is signaled by identity_drain_o. The wrapper does not implement producer cancellation, drain collection or age arbitration. Reset must reset external holders too.",
-  "scope": "Connected 64-entry PRF, two-wide rename/checkpoint ownership and 32-entry ROB, driven by synthetic dispatch/completion inputs. No IQ, issue selection, execution units, frontend, CSR/MMIO head state machine, physical timing or complete OOO processor acceptance. Commit-only operations require a future atomic head-result/retirement path and trap event finalization; solo flags alone do not implement those operations. This gate is full-size simulation, independent mutation testing and generic synthesis, not an integrated formal proof.",
+  "scope": "Connected 64-entry PRF, two-wide rename/checkpoint ownership and 32-entry ROB, driven by synthetic dispatch/completion inputs. No IQ, issue selection, execution units, frontend, CSR/MMIO head state machine, physical timing or complete OOO processor acceptance. The atomic head-result/retirement interface is checked separately; CSR instruction dispatch and side-effect coordination remain future integration work. This gate is full-size simulation, independent mutation testing and generic synthesis, not an integrated formal proof.",
   "seeds": [
     1,
     42,
     20260914
   ],
   "random_cycles_per_seed": 20000,
-  "directed_cycles": 8676
+  "directed_cycles": 8676,
+  "serial_retirement": "The atomic head interface is defined and verified separately in config/serial_retirement.json. This historical gate keeps serial_offer_i=0."
 }
