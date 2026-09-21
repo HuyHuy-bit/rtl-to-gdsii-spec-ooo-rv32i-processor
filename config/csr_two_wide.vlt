@@ -1,0 +1,4 @@
+`verilator_config
+lint_off -rule UNUSEDPARAM -file "*platform_pkg.sv"
+lint_off -rule UNUSEDPARAM -file "*commit_event_pkg.sv"
+lint_off -rule UNUSEDSIGNAL -file "*csr_two_wide.sv" -match "*decoded*"

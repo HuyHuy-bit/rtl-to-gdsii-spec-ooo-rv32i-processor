@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "profile": "two_wide_machine_csr_state",
+  "sources": [
+    "rtl/generated/platform_pkg.sv",
+    "rtl/generated/commit_event_pkg.sv",
+    "rtl/core/single_lane_pkg.sv",
+    "rtl/frontend/decode_single.sv",
+    "rtl/core/csr_two_wide.sv"
+  ],
+  "lint_config": "config/csr_two_wide.vlt",
+  "seeds": [
+    1,
+    42,
+    20260920
+  ],
+  "scope": "Standalone serialized machine CSR state with held proposals, zero/one/two ordinary retirements, CSR legality/WARL, trap entry and MRET. Not connected to the core, ROB, PRF or frontend; no architectural core acceptance or physical timing claim.",
+  "handshake": "One head request is captured when request_valid_i && request_ready_o. A registered response holds legality, CSR read result, next PC and four effects until response_ready_i. No same-cycle response or replacement. cancel_i discards the pending response and suppresses preparation/acceptance; reset also restores all architectural state. Invalid responses expose zero payload. Illegal responses may be consumed but have no explicit state effect or retirement.",
+  "serialization": "Caller supplies retire_count_i=0..2 for ordinary instructions only. It must be zero while a head request is offered, a response is pending, or cancellation is asserted. Accepted legal CSR or MRET increments minstret internally by one; accepted traps and illegal commands do not. The future head controller must make response acceptance atomic with PRF write, ROB retirement/trap acceptance, event delivery and recovery.",
+  "sampling": "The request captures CSR old/new values and redirect target at the head; fields remain stable while held, including reads of live counters. Only response acceptance applies explicit writes. Counters continue to advance while held or canceled, subject to mcountinhibit. Writes to either counter half suppress the entire corresponding implicit 64-bit increment on the accepting edge, preserving the current other half. Inhibit changes govern the following cycle; reset wins.",
+  "read_semantics": "read_o indicates the architectural CSR read; CSRRW[I] rd=x0 suppresses it and value_o is zero. CSRRS/CSRRC rs1=x0 or immediate zero suppress requested writes; a nonzero source register containing zero still requests a write. Register x0 is forced to zero independently of source_i. Event read_mask describes implemented state bits, as required by commit_event_v0, and is not the instruction read-enable.",
+  "traps": "trap_i overrides instruction decoding, using caller-validated synchronous cause/value, current direct mtvec and ordered mstatus/mepc/mcause/mtval effects. MRET uses current mepc and updates MIE/MPIE. MPP remains fixed M. Interrupts and CSR/system instruction dispatch are not implemented here.",
+  "existing_slice": "csr_single and its acceptance profile remain unchanged. This independently tested block is for the future two-wide head controller."
+}
