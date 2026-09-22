@@ -17,6 +17,7 @@ OSS_CAD_SUITE ?= $(HOME)/tools/oss-cad-suite-20260905/oss-cad-suite
 .PHONY: issue-queue-check
 .PHONY: issue-backend-check
 .PHONY: integer-backend-check control-flow-backend-check fetch-two-wide-check fetch-execution-core-check frontend-faults-check
+.PHONY: head-system-backend-check
 .PHONY: serial-retirement-check
 .PHONY: head-trap-core-check
 .PHONY: csr-two-wide-check
@@ -45,6 +46,9 @@ issue-queue-check:
 
 issue-backend-check:
 	@python3 tools/run_issue_backend.py --suite "$(OSS_CAD_SUITE)"
+
+head-system-backend-check:
+	@python3 tools/run_head_system_backend.py --suite "$(OSS_CAD_SUITE)"
 
 serial-retirement-check:
 	@python3 tools/run_serial_retirement.py --suite "$(OSS_CAD_SUITE)"

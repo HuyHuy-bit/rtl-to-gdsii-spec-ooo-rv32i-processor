@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "profile": "csr_mret_head_backend",
+  "sources": [
+    "rtl/generated/platform_pkg.sv",
+    "rtl/generated/commit_event_pkg.sv",
+    "rtl/core/single_lane_pkg.sv",
+    "rtl/frontend/decode_single.sv",
+    "rtl/backend/rename_bundle.sv",
+    "rtl/backend/rename_state.sv",
+    "rtl/backend/rename_checkpoints.sv",
+    "rtl/backend/rename_recovery.sv",
+    "rtl/backend/rob_two_wide.sv",
+    "rtl/backend/prf_4r2w.sv",
+    "rtl/backend/backend_two_wide.sv",
+    "rtl/core/csr_two_wide.sv",
+    "rtl/core/head_system_controller.sv",
+    "verif/unit/head_system_backend.sv"
+  ],
+  "lint_config": "config/head_system_backend.vlt",
+  "seeds": [
+    1,
+    42,
+    20260922
+  ],
+  "scope": "Head CSR/MRET controller connected to the real two-wide ROB, rename/PRF and machine CSR bank through a verification harness. Synthetic dispatch and source-tag ownership are supplied by the harness caller. No IQ/frontend dispatch integration, frontend MRET redirect acceptance, full architectural-suite acceptance or physical timing claim.",
+  "request": "The caller supplies one serialized CSR or MRET descriptor with its complete ROB identity and the value/readiness of its captured renamed source. Only a matching live head may prepare. The instruction and source are captured on prepare_o; a pending response uses saved metadata. The caller must enforce solo non-CFI allocation, prevent younger dispatch/issue and reserve head read/completion resources. Faults have preparation priority. Reset/flush/branch cancellation must also discard or revalidate all external descriptors.",
+  "acceptance": "Legal responses offer the final event to the atomic serial backend path. serial_accept_i is actual backend retirement, not consumer readiness. It alone authorizes CSR effects and a MRET redirect. retire_accept_i is the complete backend acceptance mask; the controller removes the serial lane before passing ordinary retirement count to the bank. The receiving frontend must have redirect capacity before retirement is enabled. Normal CSR acceptance does not redirect.",
+  "illegal": "An illegal CSR response offers a resultless cause-2 completion, preserving instruction, PC and consumed source, with mtval equal to instruction bits. It does not retire, write a register or change explicit CSR state. illegal_accept_i must be actual ROB completion acceptance. The resulting raw head fault is then prepared through the same bank and accepted atomically with backend trap recovery and redirect. Trap events carry the ROB-assigned order and do not increment minstret.",
+  "recovery": "cancel_i cancels the bank proposal and all output offers without resetting CSR state; reset restores CSR reset values. The caller supplies cancellation on flush/recovery/fatal and suppresses ordinary retirement then. The owner identity and PC must remain live while a proposal is pending, otherwise cancellation is mandatory. Global identity drain requires all external descriptors and pending requests to be quiescent. The integration harness withholds branch resolution while a head bank response is pending or a raw head fault exists; it does not feed accepted branch recovery back combinationally into trap acceptance.",
+  "verification": "The harness connects legal responses to serial retirement, arbitrates illegal completions on port zero and feeds actual trap acceptance back to the controller. It exposes redirect intent without modeling frontend transport. Independent software checks all event bits, CSR snapshots/counters/effects, PRF contents and ownership, full ROB identities, stalls/cancellation and recovery."
+}
