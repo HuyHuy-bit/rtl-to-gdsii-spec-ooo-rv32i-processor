@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "profile": "head_system_dispatch_ownership",
+  "sources": [
+    "rtl/core/head_system_dispatch.sv"
+  ],
+  "seeds": [
+    1,
+    42,
+    20260923
+  ],
+  "random_cycles_per_seed": 10000,
+  "directed_cycles": 104636,
+  "scope": "Standalone production dispatch-policy and descriptor block for the pending CSR/MRET integration. Tests supply rename/ROB acceptance and validated recovery synthetically. Not yet connected to the production issue backend, head controller, PRF reads or frontend. No complete CSR instruction path, formal acceptance or clock claim.",
+  "dispatch": "valid_i is a lane-zero prefix. system_i classifies CSR/MRET after frontend-fault override; cfi0_i classifies the selected lane-zero CFI. Ordinary pairs pass through. Lane-zero CSR/MRET is admitted alone; lane-one CSR/MRET is deferred while lane zero proceeds. CFI lane zero cuts the tail. dispatch_valid_o is the offered backend prefix, not acceptance; all other resources must still reserve it atomically. Feed dispatch_solo_o into ROB allocation. Feed only queue_dispatch_o into IQ dispatch. Held ownership blocks all younger allocation, while previously admitted older IQ work may continue.",
+  "capture": "On actual accepted lane-zero system allocation, save the full 13-bit ROB identity, original instruction/PC and renamed physical source tag. Lane-zero metadata inputs are ignored otherwise. The caller uses decode_single: register CSR reads its renamed rs1; immediate CSR, MRET and rs1=x0 use p0. A register CSR with rd=rs1 must retain its old source, not its new destination. Later RAT or offered-input changes cannot replace the captured source.",
+  "head": "system_valid_o requires a held descriptor, live head, exact generation+slot identity and matching PC, with no reset/flush/drain/recovery. This qualifies later head-controller preparation and PRF read arbitration; it does not claim operand readiness. The controller must wait for the captured tag to be ready and use accepted-write bypass. The descriptor remains held through preparation, backpressure and an illegal completion.",
+  "release": "Only actual legal serial retirement with matching full identity releases normally. No same-cycle descriptor refill or younger dispatch is allowed. Illegal completion does not release; accepted trap recovery must drive flush_i. Reset/full flush cancels ownership. CSR state itself is not part of this block.",
+  "recovery": "recover_i denotes an already validated and accepted branch recovery; recover_slot_i is the branch slot and head_id_i supplies the pre-cycle head. Modulo-32 order kills only a younger descriptor, suppressing every new offer that cycle. Older/equal descriptors are retained. killed_o reports cancellation for the future head-controller connection. Full reset/flush dominates retirement. Slot-only recovery is valid only with upstream generation/live-branch validation. Recovery cannot coincide with accepted serial retirement.",
+  "drain": "drained_i suppresses new transactions and requires no held descriptor. Coordinator must also check external IQ/producer/ROB/frontend holders; this block does not implement global identity drain."
+}

@@ -1,0 +1,1129 @@
+{
+  "schema": 1,
+  "profile": "head_system_dispatch_ownership",
+  "status": "pass",
+  "scope": "Standalone production dispatch-policy and descriptor block for the pending CSR/MRET integration. Tests supply rename/ROB acceptance and validated recovery synthetically. Not yet connected to the production issue backend, head controller, PRF reads or frontend. No complete CSR instruction path, formal acceptance or clock claim.",
+  "verilator": "Verilator 5.048 2026-04-26 rev v5.048-56-gc233a3905",
+  "simulations": [
+    {
+      "seed": 1,
+      "cycles": 114636,
+      "allocation_stall": 2615,
+      "captured": 34715,
+      "cfi_cut": 1050,
+      "changed_inputs": 59369,
+      "drain_idle": 1,
+      "dual_ordinary": 462,
+      "flush_live": 17306,
+      "generation_capture": 34710,
+      "head_recovery_blocked": 1024,
+      "held": 59369,
+      "immediate": 833,
+      "lane1_deferred": 1062,
+      "mret": 292,
+      "no_head": 17762,
+      "older_head": 32587,
+      "recover_kill": 16070,
+      "recover_preserve": 17106,
+      "recovery_blocked": 1,
+      "register_csr": 33590,
+      "register_source": 33559,
+      "release_bubble": 893,
+      "reset_live": 446,
+      "retired": 893,
+      "stale_generation": 4032,
+      "system_tail_cut": 35231,
+      "wrap_recovery": 21583,
+      "wrong_pc": 883,
+      "younger_blocked": 42471,
+      "zero_source": 1156
+    },
+    {
+      "seed": 42,
+      "cycles": 114636,
+      "allocation_stall": 2640,
+      "captured": 34764,
+      "cfi_cut": 1028,
+      "changed_inputs": 59364,
+      "drain_idle": 1,
+      "dual_ordinary": 514,
+      "flush_live": 17319,
+      "generation_capture": 34759,
+      "head_recovery_blocked": 1024,
+      "held": 59364,
+      "immediate": 860,
+      "lane1_deferred": 1019,
+      "mret": 293,
+      "no_head": 17736,
+      "older_head": 32614,
+      "recover_kill": 16089,
+      "recover_preserve": 17114,
+      "recovery_blocked": 1,
+      "register_csr": 33611,
+      "register_source": 33587,
+      "release_bubble": 904,
+      "reset_live": 451,
+      "retired": 904,
+      "stale_generation": 4009,
+      "system_tail_cut": 35321,
+      "wrap_recovery": 21603,
+      "wrong_pc": 868,
+      "younger_blocked": 42466,
+      "zero_source": 1177
+    },
+    {
+      "seed": 20260923,
+      "cycles": 114636,
+      "allocation_stall": 2521,
+      "captured": 34732,
+      "cfi_cut": 1063,
+      "changed_inputs": 59341,
+      "drain_idle": 1,
+      "dual_ordinary": 521,
+      "flush_live": 17332,
+      "generation_capture": 34727,
+      "head_recovery_blocked": 1024,
+      "held": 59341,
+      "immediate": 850,
+      "lane1_deferred": 1073,
+      "mret": 249,
+      "no_head": 17778,
+      "older_head": 32577,
+      "recover_kill": 16084,
+      "recover_preserve": 17083,
+      "recovery_blocked": 1,
+      "register_csr": 33633,
+      "register_source": 33606,
+      "release_bubble": 883,
+      "reset_live": 433,
+      "retired": 883,
+      "stale_generation": 4001,
+      "system_tail_cut": 35212,
+      "wrap_recovery": 21579,
+      "wrong_pc": 848,
+      "younger_blocked": 42443,
+      "zero_source": 1126
+    }
+  ],
+  "required_counters": [
+    "dual_ordinary",
+    "lane1_deferred",
+    "system_tail_cut",
+    "cfi_cut",
+    "allocation_stall",
+    "drain_idle",
+    "held",
+    "younger_blocked",
+    "changed_inputs",
+    "no_head",
+    "stale_generation",
+    "wrong_pc",
+    "older_head",
+    "recover_kill",
+    "recover_preserve",
+    "wrap_recovery",
+    "reset_live",
+    "flush_live",
+    "retired",
+    "release_bubble",
+    "captured",
+    "register_source",
+    "zero_source",
+    "mret",
+    "immediate",
+    "register_csr",
+    "generation_capture",
+    "recovery_blocked",
+    "head_recovery_blocked"
+  ],
+  "mutations_detected": [
+    "younger_dispatch",
+    "lane1_system",
+    "system_tail",
+    "cfi_tail",
+    "iq_system_leak",
+    "lost_solo",
+    "wrong_source",
+    "wrong_identity",
+    "wrong_instruction",
+    "wrong_pc",
+    "slot_only_head",
+    "ignore_pc",
+    "early_release",
+    "lost_release",
+    "wrong_recovery_age",
+    "kill_older",
+    "flush_retains",
+    "capture_on_offer",
+    "live_source",
+    "recover_offer"
+  ],
+  "caller_assertions_checked": [
+    "prefix",
+    "allocation",
+    "operation",
+    "source",
+    "retire",
+    "drain",
+    "recovery"
+  ],
+  "stimulus_guards_checked": [],
+  "synthesis_cells": {
+    "$_AND_": 193,
+    "$_ORNOT_": 86,
+    "$_XNOR_": 27,
+    "$_NAND_": 20,
+    "$_NOR_": 5,
+    "$_ANDNOT_": 7,
+    "$_XOR_": 3,
+    "$_OR_": 4,
+    "$_MUX_": 1,
+    "$_DFFE_PP_": 83,
+    "$_SDFFE_PP0P_": 1
+  },
+  "two_wide_core_accepted": false,
+  "inputs_sha256": {
+    "Makefile": "89fc9c064fcb35b972829d3ec1d71735ce186c2e520be942c5da2f530c7fabe0",
+    "config/head_system_dispatch.json": "46e0bfac41524a4bb077d1d9c7c94c4fff162b5abb811710bccbbe9b3b28634e",
+    "config/synthesis.lock": "6e5753a294bab89ea89d5b3454d1741c415cb6db267904fe70e70dd89d9f2a7c",
+    "config/toolchain.lock": "11fecc1b53390b04ec510790210d500198322c0ccffc04605ea9ee6994fa87c0",
+    "rtl/core/head_system_dispatch.sv": "9c8d7dbd47d24a20d63a704a11935cfe7aa95383b11cbf8371ee405b23ac0cb1",
+    "tools/run_unit.py": "b71c2dc10c44e861d3353be3733c83aba42c7f2cef2eef0c610d89a5e29a2d42",
+    "tools/unit_profiles.py": "b74469678d372888524b57e07b0989a42c6a29cac4cdcc4a0e96203b5c571440",
+    "verif/unit/head_system_dispatch_tb.cpp": "de14557c04af694cc1be08b779f2e07d843cb55f152060147009a33e84fe91c4"
+  },
+  "commands": [
+    {
+      "command": [
+        "verilator",
+        "--version"
+      ],
+      "returncode": 0,
+      "log": "version.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--lint-only",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/rtl/core/head_system_dispatch.sv"
+      ],
+      "returncode": 0,
+      "log": "lint.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/rtl/core/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir/head_system_dispatch_check",
+        "1",
+        "10000"
+      ],
+      "returncode": 0,
+      "log": "seed_1.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir/head_system_dispatch_check",
+        "42",
+        "10000"
+      ],
+      "returncode": 0,
+      "log": "seed_42.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir/head_system_dispatch_check",
+        "20260923",
+        "10000"
+      ],
+      "returncode": 0,
+      "log": "seed_20260923.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir/head_system_dispatch_check",
+        "negative",
+        "prefix"
+      ],
+      "returncode": 1,
+      "log": "negatives_prefix.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir/head_system_dispatch_check",
+        "negative",
+        "allocation"
+      ],
+      "returncode": 1,
+      "log": "negatives_allocation.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir/head_system_dispatch_check",
+        "negative",
+        "operation"
+      ],
+      "returncode": 1,
+      "log": "negatives_operation.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir/head_system_dispatch_check",
+        "negative",
+        "source"
+      ],
+      "returncode": 1,
+      "log": "negatives_source.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir/head_system_dispatch_check",
+        "negative",
+        "retire"
+      ],
+      "returncode": 1,
+      "log": "negatives_retire.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir/head_system_dispatch_check",
+        "negative",
+        "drain"
+      ],
+      "returncode": 1,
+      "log": "negatives_drain.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/obj_dir/head_system_dispatch_check",
+        "negative",
+        "recovery"
+      ],
+      "returncode": 1,
+      "log": "negatives_recovery.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/younger_dispatch/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/younger_dispatch/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "younger_dispatch_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/younger_dispatch/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "younger_dispatch.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/lane1_system/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/lane1_system/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "lane1_system_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/lane1_system/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "lane1_system.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/system_tail/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/system_tail/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "system_tail_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/system_tail/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "system_tail.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/cfi_tail/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/cfi_tail/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "cfi_tail_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/cfi_tail/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "cfi_tail.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/iq_system_leak/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/iq_system_leak/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "iq_system_leak_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/iq_system_leak/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "iq_system_leak.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/lost_solo/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/lost_solo/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "lost_solo_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/lost_solo/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "lost_solo.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_source/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_source/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "wrong_source_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_source/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "wrong_source.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_identity/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_identity/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "wrong_identity_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_identity/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "wrong_identity.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_instruction/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_instruction/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "wrong_instruction_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_instruction/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "wrong_instruction.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_pc/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_pc/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "wrong_pc_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_pc/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "wrong_pc.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/slot_only_head/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/slot_only_head/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "slot_only_head_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/slot_only_head/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "slot_only_head.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/ignore_pc/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/ignore_pc/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "ignore_pc_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/ignore_pc/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "ignore_pc.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/early_release/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/early_release/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "early_release_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/early_release/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "early_release.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/lost_release/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/lost_release/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "lost_release_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/lost_release/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "lost_release.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_recovery_age/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_recovery_age/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "wrong_recovery_age_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/wrong_recovery_age/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "wrong_recovery_age.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/kill_older/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/kill_older/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "kill_older_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/kill_older/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "kill_older.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/flush_retains/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/flush_retains/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "flush_retains_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/flush_retains/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "flush_retains.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/capture_on_offer/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/capture_on_offer/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "capture_on_offer_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/capture_on_offer/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "capture_on_offer.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/live_source/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/live_source/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "live_source_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/live_source/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "live_source.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "head_system_dispatch",
+        "-DSYNTHESIS",
+        "-Wno-UNUSEDSIGNAL",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/recover_offer/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/recover_offer/head_system_dispatch.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/head_system_dispatch_tb.cpp",
+        "-o",
+        "head_system_dispatch_check"
+      ],
+      "returncode": 0,
+      "log": "recover_offer_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/mutations/recover_offer/obj_dir/head_system_dispatch_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "recover_offer.log"
+    },
+    {
+      "command": [
+        "/home/huy/tools/oss-cad-suite-20260905/oss-cad-suite/bin/yosys",
+        "-s",
+        "/home/huy/projects/spec_ooo_riscv/out/head_system_dispatch/synth.ys"
+      ],
+      "returncode": 0,
+      "log": "synth.log"
+    }
+  ],
+  "artifacts_sha256": {
+    "Makefile": "89fc9c064fcb35b972829d3ec1d71735ce186c2e520be942c5da2f530c7fabe0",
+    "config/head_system_dispatch.json": "46e0bfac41524a4bb077d1d9c7c94c4fff162b5abb811710bccbbe9b3b28634e",
+    "config/synthesis.lock": "6e5753a294bab89ea89d5b3454d1741c415cb6db267904fe70e70dd89d9f2a7c",
+    "config/toolchain.lock": "11fecc1b53390b04ec510790210d500198322c0ccffc04605ea9ee6994fa87c0",
+    "rtl/core/head_system_dispatch.sv": "9c8d7dbd47d24a20d63a704a11935cfe7aa95383b11cbf8371ee405b23ac0cb1",
+    "tools/run_unit.py": "b71c2dc10c44e861d3353be3733c83aba42c7f2cef2eef0c610d89a5e29a2d42",
+    "tools/unit_profiles.py": "b74469678d372888524b57e07b0989a42c6a29cac4cdcc4a0e96203b5c571440",
+    "verif/unit/head_system_dispatch_tb.cpp": "de14557c04af694cc1be08b779f2e07d843cb55f152060147009a33e84fe91c4",
+    "out/head_system_dispatch/mutations/ignore_pc/head_system_dispatch.sv": "43d817a1e5c0ffaf2bf4d79c9b6081c27d3ae066fa2443fc27851a85f5bf794e",
+    "out/head_system_dispatch/ignore_pc_build.log": "d4decd2ef567d616468e0d1b3f1b8af58ab39341140cd9386580dcfae1051119",
+    "out/head_system_dispatch/early_release.log": "c4d2b0d9de174e29527a19cfe0a9f7cc66529d8ae5d11b20176ad1582674d0bb",
+    "out/head_system_dispatch/lost_release.log": "bca775ed0b9557eead1bdd2481dfc54937b631f59c0bdaacaaca15eb2555c0a1",
+    "out/head_system_dispatch/mutations/younger_dispatch/head_system_dispatch.sv": "f8846ef676eb38021626fd59896dfcc59a059678d459b58baa9921479a1dbd12",
+    "out/head_system_dispatch/live_source.log": "142aba17edb5a2d3563df7a07a1f430735fba8727bad6bb94213008cbad6a756",
+    "out/head_system_dispatch/seed_20260923.log": "39c24edac714c011be561eb06a24eb0ce5415ec04f30d0dc4c893d7ad86d4e1e",
+    "out/head_system_dispatch/live_source_build.log": "fd3a6707db5c8acf7ed7c8ec93527c82bec59f7fc094c4c788c8de9ec7aa92a0",
+    "out/head_system_dispatch/synth.json": "206a1279c3728bce3c0e83a5ed843b9761b44389f4db8c1ea9284292163102e8",
+    "out/head_system_dispatch/mutations/slot_only_head/head_system_dispatch.sv": "f4404191cf1db11bffb0f61de9e5a47aefcfa8f7f8ee65d89ea2b9d5fb36d747",
+    "out/head_system_dispatch/mutations/early_release/head_system_dispatch.sv": "60c1089c351aa9856c48163dd7d93105c5ea2662f4a6e5b3485e396549c74dae",
+    "out/head_system_dispatch/iq_system_leak.log": "48604a5e969af44d85431daac59b242c284001baecd9c4e56adde017fcdf55b7",
+    "out/head_system_dispatch/mutations/lost_release/head_system_dispatch.sv": "0cc246a2443333d67af682a97e0daab6e550a65190663440351fbd9d59078d2c",
+    "out/head_system_dispatch/mutations/capture_on_offer/head_system_dispatch.sv": "afccdc54a1bd4ce4fa67e98d53c5d7854fb8dd3de0af24f72a46a825882c5ec1",
+    "out/head_system_dispatch/capture_on_offer_build.log": "1f0b9821584017b6bdf8a153f43a39ef716fc1e651aa5d2988310bea5e9879a3",
+    "out/head_system_dispatch/cfi_tail_build.log": "4fb2939a3b4beba4370af7e5b82e54d37058102e4089731ff598db611e7ef9c1",
+    "out/head_system_dispatch/recover_offer.log": "91487284fc2c4940cc0c4fd2845e5957adb761a4e55d548aeb33271eb8257e41",
+    "out/head_system_dispatch/younger_dispatch_build.log": "4553a9114ce31f6ce9bbe2f61b5ebf792c587ba7bd6c206ccb831eb203817dda",
+    "out/head_system_dispatch/lane1_system.log": "f40baf6fdab814c7da750af62ac926689e80192736362e426939a75efc6d4e02",
+    "out/head_system_dispatch/wrong_pc.log": "bc55a59ae13475fb6ad3e466f7d5d007a8c4696609cb6b5dd2915a4adb14f7aa",
+    "out/head_system_dispatch/mutations/lost_solo/head_system_dispatch.sv": "4c94be70b79f082657cf55294533bc1fb9c54ebc8a3025ea1a29dc2bb8a73dc3",
+    "out/head_system_dispatch/synth.log": "37c4600e810ee59b6f471b3197adfff46d967b4ecef93fe7734459254ae6d5c5",
+    "out/head_system_dispatch/seed_1.log": "41d9ebd0d1727095b233c1ca7dde0de777277f48cf38b814b152be1efa1e455c",
+    "out/head_system_dispatch/negatives_prefix.log": "38c12905140a9fa17fce163a8df2989fab4d356d450d2b0786844ff26e4a5f70",
+    "out/head_system_dispatch/mutations/system_tail/head_system_dispatch.sv": "5058b0d7140df643f0115fc792b8ccefafe86a828ab752d6d33f2a040435403a",
+    "out/head_system_dispatch/capture_on_offer.log": "ca2e9538f475ef902aa9580bd97970319c4d10627758944a56bee59fd54cddf2",
+    "out/head_system_dispatch/mutations/recover_offer/head_system_dispatch.sv": "ed0ab1a76d2309a281d7772d891cab4320fec729c7d4871881fbbe3073912b65",
+    "out/head_system_dispatch/ignore_pc.log": "351ec00d82c1fe3f4434d8d412ea5f6bdf560bffb16c5b555321c9e24422b98f",
+    "out/head_system_dispatch/system_tail.log": "8a62f2570ec8ff9010fbdf3bdbfd9e2053685ffbe01e59b5a54ade3065b5183a",
+    "out/head_system_dispatch/negatives_recovery.log": "f57ae47345ec5807e2b882677c7cc91e9f1fb16f704d6a06326953d78b6ec8c4",
+    "out/head_system_dispatch/mutations/flush_retains/head_system_dispatch.sv": "c572cd2aa700db42236effd008f748638318a302338ca4b21e4eb65b8b395390",
+    "out/head_system_dispatch/version.log": "1d030bd780d7885e741ac2ac46359c22b6214139b55d52958a68459ad10159d4",
+    "out/head_system_dispatch/mutations/wrong_pc/head_system_dispatch.sv": "f6c8b2175b02dcdddc98c1837e43ed92d02f9e1029db93f7afe428fc025e6a08",
+    "out/head_system_dispatch/wrong_source.log": "142aba17edb5a2d3563df7a07a1f430735fba8727bad6bb94213008cbad6a756",
+    "out/head_system_dispatch/recover_offer_build.log": "650c01bc5891526d1208169ccea3848d68c90407ac0c36585d2078dd266337d4",
+    "out/head_system_dispatch/mutations/iq_system_leak/head_system_dispatch.sv": "b8cb397acc813d5828e13f6c9065d463d029540ddd34ef857755944704aed3a9",
+    "out/head_system_dispatch/lane1_system_build.log": "e0217a62d0af623a8c1b3496cacb49309b3f6208b2430fd8bda126db94088066",
+    "out/head_system_dispatch/cfi_tail.log": "374693e4127b6e4dde5979cb46910917463a5eb98aa7d87f0e637d7875a70c3a",
+    "out/head_system_dispatch/wrong_recovery_age.log": "dcfcbd402e9de86aa4085a10f0bb18fe646e777bba88c80cf2a9ea981e0b9938",
+    "out/head_system_dispatch/kill_older_build.log": "f12b1c82c79dc2c6ca255a11820b19a838eadf72c7a872068ceb3ef291021632",
+    "out/head_system_dispatch/negatives_operation.log": "7143b0f2d147be594165dce6b6652ad8a54361406aab4b8050069846d0960749",
+    "out/head_system_dispatch/mutations/wrong_instruction/head_system_dispatch.sv": "79f91b83044628ea7f7a88674abf7fce04c5faae3a64e4d0edc1b5a87f29873b",
+    "out/head_system_dispatch/lost_solo_build.log": "5190d61014df242a833113b38578d7226bad2e71806d79297c3a5e49566a9a41",
+    "out/head_system_dispatch/mutations/wrong_identity/head_system_dispatch.sv": "4a21ee4e2ed6158a02b99cccf2e8ddceac0de1a819cf095b8ba13ac8c84f930d",
+    "out/head_system_dispatch/negatives_source.log": "e4c5c68adc96c91eb831fda4b2231821c82eb94f1ef8500ca10f0c7b6b49cba2",
+    "out/head_system_dispatch/mutations/wrong_recovery_age/head_system_dispatch.sv": "a8ab06376215f52daff220b24a49db1388db641e1bdb5615024af7bc43e42c36",
+    "out/head_system_dispatch/wrong_instruction.log": "0fe46c175ad577355a2ace6e80213c07275ed3edc744ee11d13587f2ba785b56",
+    "out/head_system_dispatch/slot_only_head.log": "f13c72bf5dd7661b3ee7eeaab3ba923a63010f0197a27d8eec1d7a54392a65e0",
+    "out/head_system_dispatch/lost_release_build.log": "0820f12742fd5e3af1dba2785b812bdff5e2c16002773783473f837e8782cbc4",
+    "out/head_system_dispatch/synth.ys": "5daf5e5a40d93826b5d2dd54b2bcfa5f6adfabb2bc59818055f403f95a510a61",
+    "out/head_system_dispatch/seed_42.log": "6635b29ad51cb9cced2f27aa669bb4a072568a6efcf5158dedeca9a9d3dd333f",
+    "out/head_system_dispatch/wrong_identity_build.log": "50a6d53aaf281edf6b52d05f4bbdb65379f849b41eb0b3c9549fe600a1b0d575",
+    "out/head_system_dispatch/negatives_allocation.log": "9442adb8aceff1fdefe21389ab71470efb8012e394f47595be422474e16e1322",
+    "out/head_system_dispatch/lost_solo.log": "e227587d6c16bc63828be36734099cb39a0c58db53fa2d5fd354a3fa21be457c",
+    "out/head_system_dispatch/negatives_retire.log": "66e8c39aac1df73703c658a8ed9683b106c6d179c92d51f3fc2e8efddfeeb983",
+    "out/head_system_dispatch/build.log": "eaa101947bc04fcb622ac5528d8655235f06c91f633ed964c66908242d3cdbeb",
+    "out/head_system_dispatch/wrong_identity.log": "bc55a59ae13475fb6ad3e466f7d5d007a8c4696609cb6b5dd2915a4adb14f7aa",
+    "out/head_system_dispatch/wrong_pc_build.log": "e903d415667c518c6266ce14886870567717dcb40c726e7eed8c0dc97229663d",
+    "out/head_system_dispatch/lint.log": "bbeb808779ef9f346334fe78c45eda2458ebd8feac9a133f73cb680fa0fe5ce8",
+    "out/head_system_dispatch/flush_retains.log": "b19350165ce98bde7afb67e71e440b7a718c2d1cc914ef2a88e32b281f30b953",
+    "out/head_system_dispatch/wrong_recovery_age_build.log": "4afce9864cb6fdf4e9b95a75f01cc6b48dfb758656c69c9073668980ca7edc52",
+    "out/head_system_dispatch/mutations/live_source/head_system_dispatch.sv": "5166bd0279c0a32cb89e3a47cbc6983f4fa223f4f719877f36ba3a38e60ec26a",
+    "out/head_system_dispatch/mutations/cfi_tail/head_system_dispatch.sv": "40e85d2c3ba8bae1841e854d8eb88d0670ca2cef4e492e24f32ee50f878b65b4",
+    "out/head_system_dispatch/younger_dispatch.log": "f84b2b9cd34760ebfa44dcd1b46120446db2d35dbb421c6b0b49aabc0a6df16c",
+    "out/head_system_dispatch/early_release_build.log": "14b680a727ccb782c26424ff8369fe3112ee625dce718b8519825e12deb6447f",
+    "out/head_system_dispatch/mutations/wrong_source/head_system_dispatch.sv": "37740eb80e301cb34d2eb2ffa5407e675ae629295ac84106828868963227e236",
+    "out/head_system_dispatch/negatives_drain.log": "2ca214cb78a699283fed92c5d3cb5404cd5a3cefb304077d3044163bf2c2ee67",
+    "out/head_system_dispatch/slot_only_head_build.log": "6d29ce227007c741cfd56d223505e524fdb772646778edc559874ea9bda9674b",
+    "out/head_system_dispatch/kill_older.log": "467bb27b2423b7ccce658727b53a6f76539cadf4dddfec7111a7ff84302c6aa2",
+    "out/head_system_dispatch/iq_system_leak_build.log": "bf079ce8e5e2fb9857ecd3dc4bf7ac0b29176b66ebf53ff5d62eeb585e40bdef",
+    "out/head_system_dispatch/wrong_source_build.log": "e0a9a3d6efb02f0bd07b956ecb179f1e4799b74c904a896a1ca7a4d51141efd9",
+    "out/head_system_dispatch/mutations/lane1_system/head_system_dispatch.sv": "9f5ef1145df60a2f11cd0d5b76242f8580836afae88487c872f611bc336a2699",
+    "out/head_system_dispatch/flush_retains_build.log": "b674ccfd23c4f28f5588ec51cf881c17abcded0abd1bec4c1348be61e6680684",
+    "out/head_system_dispatch/mutations/kill_older/head_system_dispatch.sv": "e848c8f0cc38d2f7d0a6aee43f380369e66aeebc0ddf55fcf0a505fd47c7f4f8",
+    "out/head_system_dispatch/wrong_instruction_build.log": "3eb746345322579d5dfc6eb5504fbb8fae7bdcad492046c57b2e10cb8d12574d",
+    "out/head_system_dispatch/system_tail_build.log": "da3406ac0914c9c6b2d6d9321c47e7512eaef417e671013b9321b928c697bdb0"
+  },
+  "archive": "evidence/head_system_dispatch/20260923T184005698540Z.tar.gz",
+  "archive_sha256": "07e55d5a7afd04ad320b8691066a5b1b60b607fe2c8116986f876809dbdcdf53"
+}
