@@ -1,5 +1,4 @@
 #include "Vcsr_two_wide.h"
-#include "csr_reference_layout.hpp"
 #include "verilated.h"
 #include <array>
 #include <cstdint>
@@ -9,78 +8,22 @@
 #include <random>
 #include <string>
 
-using Effect = std::array<uint32_t, 7>;
-struct Reply {
-    bool legal=false, read=false, trap=false;
-    uint32_t value=0, next=0;
-    std::array<Effect, 4> effects{};
-};
-struct Input {
-    bool reset=false, cancel=false, request=false, ready=false, trap=false;
+#include "csr_reference.hpp"
+struct Input : Command {
+    bool reset=false, cancel=false, request=false, ready=false;
     unsigned retired=0;
-    uint32_t instruction=0, source=0, pc=0, cause=0, value=0;
 };
-uint32_t csr(unsigned address, unsigned kind=2, unsigned source=0, unsigned dest=1) {
-    return (address << 20) | (source << 15) | (kind << 12) | (dest << 7) | 0x73;
-}
-struct Bench {
+struct Bench : CsrModel {
     Vcsr_two_wide dut;
-    std::map<unsigned, uint32_t> state;
     std::map<std::string, uint64_t> coverage;
     uint64_t cycles=0;
     bool pending=false;
     Reply held;
-    Bench() { reset_state(); }
     [[noreturn]] void fail(const std::string& message) const {
         std::cerr << "CSR two-wide mismatch cycle=" << cycles << " " << message << '\n';
         std::exit(1);
     }
     void check(bool value, const std::string& message) const { if (!value) fail(message); }
-    void reset_state() { state.clear(); for (const auto& c : CSR_SPEC) state[c.address]=c.reset; }
-    const Spec* spec(unsigned address) const {
-        for (const auto& c : CSR_SPEC) if (c.address == address) return &c;
-        return nullptr;
-    }
-    Effect effect(unsigned address, uint32_t data, uint32_t mask, unsigned reason) const {
-        const auto& c=*spec(address);
-        return {1, address, state.at(address), data, c.write_mask | c.fixed_mask, mask, reason};
-    }
-    Reply propose(const Input& in) const {
-        Reply out;
-        out.next=in.pc;
-        out.trap=in.trap;
-        if (in.trap) {
-            out.legal=true; out.next=state.at(0x305);
-            const uint32_t status=(state.at(0x300) & ~0x88u) | ((state.at(0x300) & 8u) << 4);
-            out.effects={effect(0x300,status,0x88,2),effect(0x341,in.pc & ~3u,0xfffffffcu,2),
-                         effect(0x342,in.cause,0xffffffffu,2),effect(0x343,in.value,0xffffffffu,2)};
-            return out;
-        }
-        if (in.instruction == 0x30200073) {
-            out.legal=true; out.next=state.at(0x341);
-            out.effects[0]=effect(0x300,(state.at(0x300)&~0x88u)|0x80u|((state.at(0x300)>>4)&8u),0x88,3);
-            return out;
-        }
-        unsigned kind=(in.instruction>>12)&7, rs=(in.instruction>>15)&31, rd=(in.instruction>>7)&31;
-        const auto* c=spec(in.instruction>>20);
-        if ((in.instruction&127)!=0x73 || kind==0 || kind==4 || !c) return out;
-        const bool write=(kind==1 || kind==5 || rs!=0);
-        if (write && c->readonly) return out;
-        out.legal=true;
-        out.read=!((kind==1 || kind==5) && rd==0);
-        const uint32_t old=state.at(c->address);
-        const uint32_t operand=kind>=5 ? rs : (rs ? in.source : 0);
-        uint32_t data=old;
-        if (kind==1 || kind==5) data=operand;
-        else if (kind==2 || kind==6) data=old | operand;
-        else data=old & ~operand;
-        data=(data & c->write_mask) | (old & ~c->write_mask);
-        data=(data & ~c->fixed_mask) | c->fixed_value;
-        out.value=out.read ? old : 0;
-        out.next=in.pc+4;
-        out.effects[0]=effect(c->address,write ? data : old,write ? c->write_mask : 0,1);
-        return out;
-    }
     uint32_t bits(unsigned offset, unsigned width) const {
         uint32_t result=0;
         for (unsigned b=0;b<width;b++)
@@ -111,29 +54,12 @@ struct Bench {
         if (in.request && request_ready) prepared=propose(in);
         if (in.reset) { pending=false; reset_state(); coverage["reset"]++; }
         else {
-            const unsigned inhibit=state.at(0x320);
             const bool commit=accept && held.legal;
-            bool cycle_write=false, instret_write=false;
-            if (commit) for (const auto& e:held.effects) if (e[0] && e[5]) {
-                cycle_write |= e[1]==0xb00 || e[1]==0xb80;
-                instret_write |= e[1]==0xb02 || e[1]==0xb82;
-            }
-            auto increment=[&](unsigned lo,unsigned hi,uint64_t amount,const std::string& name) {
-                uint64_t old=(uint64_t(state.at(hi))<<32)|state.at(lo), next=old+amount;
-                if (uint64_t(state.at(lo))+amount>0xffffffffull) coverage[name+"_carry"]++;
-                if (next<old) coverage[name+"_wrap"]++;
-                state[lo]=uint32_t(next); state[hi]=uint32_t(next>>32);
-            };
-            if (!(inhibit&1) && !cycle_write) increment(0xb00,0xb80,1,"cycle");
-            else coverage[cycle_write ? "cycle_write_priority" : "cycle_inhibit"]++;
-            if (!(inhibit&4) && !instret_write)
-                increment(0xb02,0xb82,commit && !held.trap ? 1 : in.retired,"instret");
-            else coverage[instret_write ? "instret_write_priority" : "instret_inhibit"]++;
+            advance(false,in.retired,accept ? &held:nullptr,&coverage);
             if (in.retired==2) coverage["dual_retire"]++;
             if (in.retired==1) coverage["single_retire"]++;
             if (valid && !in.ready) coverage["held"]++;
             if (commit) {
-                for (const auto& e:held.effects) if (e[0]) state[e[1]]=(state.at(e[1])&~e[5])|(e[3]&e[5]);
                 coverage[held.trap ? "trap" : (held.effects[0][6]==3 ? "mret" : "csr")]++;
                 if (!held.trap && held.effects[0][6]==1) {
                     coverage[held.read ? "csr_read" : "read_suppressed"]++;

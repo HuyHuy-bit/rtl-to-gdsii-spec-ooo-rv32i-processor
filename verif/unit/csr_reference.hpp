@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <map>
+#include <string>
 using Effect = std::array<uint32_t, 7>;
 struct Reply {
     bool legal=false, read=false, trap=false;
@@ -64,7 +65,8 @@ struct CsrModel {
         out.effects[0]=effect(c->address,write ? data : old,write ? c->write_mask : 0,1);
         return out;
     }
-    void advance(bool reset,unsigned ordinary,const Reply* accepted) {
+    void advance(bool reset,unsigned ordinary,const Reply* accepted,
+                 std::map<std::string,uint64_t>* coverage=nullptr) {
         if (reset) { reset_state(); return; }
         const unsigned inhibit=state.at(0x320);
         bool cycle_write=false, instret_write=false;
@@ -72,13 +74,19 @@ struct CsrModel {
             cycle_write |= e[1]==0xb00 || e[1]==0xb80;
             instret_write |= e[1]==0xb02 || e[1]==0xb82;
         }
-        auto increment=[&](unsigned lo,unsigned hi,uint64_t amount) {
-            uint64_t value=(uint64_t(state.at(hi))<<32)|state.at(lo); value+=amount;
+        auto increment=[&](unsigned lo,unsigned hi,uint64_t amount,const std::string& name) {
+            const uint64_t old=(uint64_t(state.at(hi))<<32)|state.at(lo), value=old+amount;
+            if (coverage) {
+                if (uint64_t(state.at(lo))+amount>0xffffffffull) (*coverage)[name+"_carry"]++;
+                if (value<old) (*coverage)[name+"_wrap"]++;
+            }
             state[lo]=uint32_t(value); state[hi]=uint32_t(value>>32);
         };
-        if (!(inhibit&1) && !cycle_write) increment(0xb00,0xb80,1);
+        if (!(inhibit&1) && !cycle_write) increment(0xb00,0xb80,1,"cycle");
+        else if (coverage) (*coverage)[cycle_write ? "cycle_write_priority":"cycle_inhibit"]++;
         if (!(inhibit&4) && !instret_write)
-            increment(0xb02,0xb82,accepted && accepted->legal && !accepted->trap ? 1:ordinary);
+            increment(0xb02,0xb82,accepted && accepted->legal && !accepted->trap ? 1:ordinary,"instret");
+        else if (coverage) (*coverage)[instret_write ? "instret_write_priority":"instret_inhibit"]++;
         if (accepted && accepted->legal) for (const auto& e:accepted->effects)
             if (e[0]) state[e[1]]=(state.at(e[1])&~e[5])|(e[3]&e[5]);
     }

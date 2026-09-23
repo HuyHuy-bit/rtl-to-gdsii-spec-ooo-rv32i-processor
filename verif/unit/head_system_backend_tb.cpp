@@ -1,5 +1,9 @@
+#include "packed_bits.hpp"
+using packed_bits::bit;
+using packed_bits::put;
+using packed_bits::get;
 #include "Vhead_system_backend.h"
-#include "head_system_reference.hpp"
+#include "csr_reference.hpp"
 #include "backend_event_layout.hpp"
 #include "verilated.h"
 #include <algorithm>
@@ -10,14 +14,6 @@
 #include <string>
 
 using Event=std::array<uint32_t,(EVENT_BITS+31)/32>;
-template<class T> void put(T& data,unsigned offset,unsigned width,uint64_t value) {
-    for (unsigned b=0;b<width;b++) {
-        unsigned p=offset+b; data[p/32]=(data[p/32]&~(1u<<(p%32)))|unsigned((value>>b)&1)<<(p%32);
-    }
-}
-template<class T> uint64_t get(const T& data,unsigned offset,unsigned width) {
-    uint64_t v=0; for (unsigned b=0;b<width;b++) v|=uint64_t((data[(offset+b)/32]>>((offset+b)%32))&1)<<b; return v;
-}
 struct Entry {
     unsigned id=0,rd=0,rs=0,tag=0,source=0,stale=0;
     uint32_t pc=0,insn=0;

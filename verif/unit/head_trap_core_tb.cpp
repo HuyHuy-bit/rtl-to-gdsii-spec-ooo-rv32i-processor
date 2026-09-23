@@ -83,7 +83,7 @@ int main(int argc,char** argv) {
             b.memory.fill(instruction(2,0,0,0,0)); b.memory[0]=0xffffffff; handler(b); b.reset();
             for (unsigned n=0;n<200;n++) {
                 Input i;
-                if (!kind) i.request_ready=!(b.held || (b.d.request_valid_o && get(b.d.request_o,REQUEST_ADDRESS_OFFSET,32)!=0));
+                if (!kind) i.request_ready=!(b.held || (b.d.request_valid_o && get32(b.d.request_o,REQUEST_ADDRESS_OFFSET,32)!=0));
                 i.latency=kind ? 40:0;
                 b.tick(i);
                 if (b.d.trap_valid_o && (kind ? (b.pending && b.pending_address==32) : b.held)) break;

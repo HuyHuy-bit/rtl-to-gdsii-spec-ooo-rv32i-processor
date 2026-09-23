@@ -1,3 +1,7 @@
+#include "packed_bits.hpp"
+using packed_bits::bit;
+using packed_bits::put;
+using packed_bits::get32;
 #include "Vfetch_two_wide.h"
 #include "verilated.h"
 #include "fetch_memory_layout.hpp"
@@ -11,17 +15,6 @@
 
 static uint32_t word(uint32_t address, unsigned serial) {
     return (address * 0x9e3779b9U) ^ (serial * 0x85ebca6bU) ^ 0x12345678U;
-}
-template<class T> static uint32_t get(const T& v, unsigned offset, unsigned width) {
-    uint32_t result = 0;
-    for (unsigned n = 0; n < width; ++n) result |= ((v[(offset+n)/32] >> ((offset+n)%32)) & 1U) << n;
-    return result;
-}
-template<class T> static void put(T& v, unsigned offset, unsigned width, uint32_t value) {
-    for (unsigned n = 0; n < width; ++n) {
-        const unsigned bit = offset+n;
-        v[bit/32] = (v[bit/32] & ~(1U << (bit%32))) | (((value >> n)&1U) << (bit%32));
-    }
 }
 struct Input {
     bool reset=false, enable=true, redirect=false, request_ready=true, response=false;
@@ -99,7 +92,7 @@ struct Bench {
                         bit=((request.pc&~31U) >> (b-REQUEST_ADDRESS_OFFSET)) & 1U;
                     if (b>=REQUEST_TRANSACTION_ID_OFFSET && b<REQUEST_TRANSACTION_ID_OFFSET+4)
                         bit=(request.id >> (b-REQUEST_TRANSACTION_ID_OFFSET)) & 1U;
-                    require(get(d.request_o,b,1)==bit, "request payload/stability");
+                    require(get32(d.request_o,b,1)==bit, "request payload/stability");
                 }
                 if (!i.request_ready) coverage["request_stall"]++;
             }

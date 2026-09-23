@@ -1,3 +1,7 @@
+#include "packed_bits.hpp"
+using packed_bits::bit;
+using packed_bits::put;
+using packed_bits::get;
 #include "Vrob_two_wide.h"
 #include "verilated.h"
 #include "rob_event_layout.hpp"
@@ -13,13 +17,6 @@
 #include <vector>
 
 using Event = std::array<uint32_t, (EVENT_BITS+31)/32>;
-template<class T> void put(T& data, unsigned offset, unsigned width, uint64_t value) {
-    for (unsigned b = 0; b < width; ++b) {
-        const unsigned p = offset+b;
-        data[p/32] = (data[p/32] & ~(1U << (p%32))) | (unsigned((value >> b)&1) << (p%32));
-    }
-}
-template<class T> unsigned bit(const T& data, unsigned offset) { return (data[offset/32] >> (offset%32)) & 1; }
 struct Entry {
     unsigned id, rd, destination, stale, pc;
     bool cfi, solo, done = false, resolved = false;

@@ -1,4 +1,8 @@
 #pragma once
+#include "packed_bits.hpp"
+using packed_bits::bit;
+using packed_bits::put;
+using packed_bits::get;
 #include "Vbackend_two_wide.h"
 #include "verilated.h"
 #include "backend_event_layout.hpp"
@@ -14,13 +18,6 @@
 #include <vector>
 
 using Event = std::array<uint32_t, (EVENT_BITS+31)/32>;
-template<class T> void put(T& data, unsigned offset, unsigned width, uint64_t value) {
-    for (unsigned b = 0; b < width; ++b) {
-        const unsigned p = offset+b;
-        data[p/32] = (data[p/32] & ~(1U << (p%32))) | (unsigned((value >> b)&1) << (p%32));
-    }
-}
-template<class T> unsigned bit(const T& data, unsigned offset) { return (data[offset/32] >> (offset%32)) & 1; }
 struct Entry {
     unsigned id, rd, destination, stale, pc;
     bool cfi, done = false, resolved = false, solo = false;
@@ -95,10 +92,6 @@ public:
         put(c.event, RD_ADDR_OFFSET, 5, trap ? 0 : e.rd);
         put(c.event, RD_WRITE_MASK_OFFSET, 32, !trap && e.rd ? UINT32_MAX : 0);
         return c;
-    }
-    template<class T> static uint64_t get(const T& data, unsigned offset, unsigned width) {
-        uint64_t value = 0; for (unsigned b = 0; b < width; ++b) value |= uint64_t(bit(data, offset+b)) << b;
-        return value;
     }
     template<class T> void equal_event(const T& actual, unsigned lane, Event expected, bool trap) {
         put(expected, VALID_OFFSET, 1, 1); put(expected, ORDER_OFFSET, 64, order+lane); put(expected, RETIRED_OFFSET, 1, !trap);

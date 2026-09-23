@@ -1,0 +1,644 @@
+{
+  "schema": 1,
+  "profile": "rename_branch_checkpoints",
+  "status": "pass",
+  "scope": "Checkpoint storage and younger-allocation histories; rename_recovery connects this bank to rename_state. Not wired to single_lane_core. No predictor-history checkpoint, ROB identity filter, or integrated multi-inflight formal acceptance is claimed.",
+  "verilator": "Verilator 5.048 2026-04-26 rev v5.048-56-gc233a3905",
+  "simulations": [
+    {
+      "seed": 1,
+      "cycles": 20032,
+      "probes": 21677,
+      "created": 4616,
+      "deferred_slot_reuse": 2,
+      "flush_live": 109,
+      "full_ordinary_rename": 4,
+      "full_stall": 2,
+      "link_retained": 4471,
+      "nested_recovery": 361,
+      "older_commit": 5186,
+      "out_of_order_resolve": 762,
+      "recovery": 1288,
+      "recovery_collision": 352,
+      "recycled_old_tag": 4723,
+      "reset_live": 32,
+      "resolve_create": 655,
+      "slot_reuse": 4608,
+      "suppressed_noise": 5,
+      "two_lane_cfi": 2270,
+      "waw": 1518,
+      "younger_kill": 346
+    },
+    {
+      "seed": 42,
+      "cycles": 20032,
+      "probes": 21636,
+      "created": 4582,
+      "deferred_slot_reuse": 3,
+      "flush_live": 107,
+      "full_ordinary_rename": 11,
+      "full_stall": 6,
+      "link_retained": 4435,
+      "nested_recovery": 356,
+      "older_commit": 5138,
+      "out_of_order_resolve": 730,
+      "recovery": 1275,
+      "recovery_collision": 318,
+      "recycled_old_tag": 4803,
+      "reset_live": 24,
+      "resolve_create": 628,
+      "slot_reuse": 4574,
+      "suppressed_noise": 5,
+      "two_lane_cfi": 2274,
+      "waw": 1484,
+      "younger_kill": 353
+    },
+    {
+      "seed": 20260910,
+      "cycles": 20032,
+      "probes": 20500,
+      "created": 4541,
+      "deferred_slot_reuse": 2,
+      "flush_live": 112,
+      "full_ordinary_rename": 8,
+      "full_stall": 3,
+      "link_retained": 4374,
+      "nested_recovery": 344,
+      "older_commit": 4933,
+      "out_of_order_resolve": 680,
+      "recovery": 1306,
+      "recovery_collision": 323,
+      "recycled_old_tag": 4629,
+      "reset_live": 21,
+      "resolve_create": 599,
+      "slot_reuse": 4533,
+      "suppressed_noise": 5,
+      "two_lane_cfi": 2238,
+      "waw": 1477,
+      "younger_kill": 351
+    }
+  ],
+  "required_counters": [
+    "created",
+    "deferred_slot_reuse",
+    "flush_live",
+    "full_ordinary_rename",
+    "full_stall",
+    "link_retained",
+    "nested_recovery",
+    "older_commit",
+    "out_of_order_resolve",
+    "probes",
+    "recovery",
+    "recovery_collision",
+    "recycled_old_tag",
+    "reset_live",
+    "resolve_create",
+    "slot_reuse",
+    "suppressed_noise",
+    "two_lane_cfi",
+    "waw",
+    "younger_kill"
+  ],
+  "mutations_detected": [
+    "includes_cfi",
+    "lost_history",
+    "wrong_snapshot",
+    "numeric_slot_age",
+    "recover_accumulates",
+    "unpruned_history",
+    "correct_kills_younger",
+    "missing_flush",
+    "self_ancestor"
+  ],
+  "caller_assertions_checked": [
+    "invalid_resolve",
+    "zero_allocation",
+    "stalled_allocation",
+    "duplicate_allocation",
+    "map_zero",
+    "map_alias"
+  ],
+  "stimulus_guards_checked": [],
+  "synthesis_cells": {
+    "$_AND_": 3420,
+    "$_NAND_": 2778,
+    "$_ANDNOT_": 8,
+    "$_NOR_": 3,
+    "$_MUX_": 32,
+    "$_OR_": 778,
+    "$_ORNOT_": 35,
+    "$_NOT_": 80,
+    "$_SDFF_PN0_": 576,
+    "$_SDFFE_PN0P_": 1536,
+    "$_DFF_P_": 8
+  },
+  "two_wide_core_accepted": false,
+  "inputs_sha256": {
+    "Makefile": "3b63953d206cba51001b495e1f18b3f40d2f1f55192f85bb73e72fc49bb1d62a",
+    "config/rename_checkpoints.json": "f0c1203f3fa5ac7bc7de9f1e31487f502f301a459fedac7a81eb2f4b980dd78f",
+    "config/synthesis.lock": "6e5753a294bab89ea89d5b3454d1741c415cb6db267904fe70e70dd89d9f2a7c",
+    "config/toolchain.lock": "11fecc1b53390b04ec510790210d500198322c0ccffc04605ea9ee6994fa87c0",
+    "rtl/backend/rename_checkpoints.sv": "0fea123ef8b0e735e35ac71d439c6e23c71a5b3547c9c4f483021b617ccc6b2c",
+    "tools/run_unit.py": "b71c2dc10c44e861d3353be3733c83aba42c7f2cef2eef0c610d89a5e29a2d42",
+    "tools/unit_profiles.py": "ec6b14270b450605aae4c2d9884d1e179f1e63700956d46c40b2e4081fe072d7",
+    "verif/unit/rename_checkpoints_tb.cpp": "d69c5988cc33a4edae9cc2115dd1d871ba3fe2e04421787651d80474d8cbbeab"
+  },
+  "commands": [
+    {
+      "command": [
+        "verilator",
+        "--version"
+      ],
+      "returncode": 0,
+      "log": "version.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--lint-only",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/rtl/backend/rename_checkpoints.sv"
+      ],
+      "returncode": 0,
+      "log": "lint.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/rtl/backend/rename_checkpoints.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/rename_checkpoints_tb.cpp",
+        "-o",
+        "rename_checkpoints_check"
+      ],
+      "returncode": 0,
+      "log": "build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/obj_dir/rename_checkpoints_check",
+        "1",
+        "20000"
+      ],
+      "returncode": 0,
+      "log": "seed_1.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/obj_dir/rename_checkpoints_check",
+        "42",
+        "20000"
+      ],
+      "returncode": 0,
+      "log": "seed_42.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/obj_dir/rename_checkpoints_check",
+        "20260910",
+        "20000"
+      ],
+      "returncode": 0,
+      "log": "seed_20260910.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/obj_dir/rename_checkpoints_check",
+        "negative",
+        "invalid_resolve"
+      ],
+      "returncode": 1,
+      "log": "negatives_invalid_resolve.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/obj_dir/rename_checkpoints_check",
+        "negative",
+        "zero_allocation"
+      ],
+      "returncode": 1,
+      "log": "negatives_zero_allocation.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/obj_dir/rename_checkpoints_check",
+        "negative",
+        "stalled_allocation"
+      ],
+      "returncode": 1,
+      "log": "negatives_stalled_allocation.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/obj_dir/rename_checkpoints_check",
+        "negative",
+        "duplicate_allocation"
+      ],
+      "returncode": 1,
+      "log": "negatives_duplicate_allocation.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/obj_dir/rename_checkpoints_check",
+        "negative",
+        "map_zero"
+      ],
+      "returncode": 1,
+      "log": "negatives_map_zero.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/obj_dir/rename_checkpoints_check",
+        "negative",
+        "map_alias"
+      ],
+      "returncode": 1,
+      "log": "negatives_map_alias.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "-DSYNTHESIS",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/includes_cfi/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/includes_cfi/rename_checkpoints.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/rename_checkpoints_tb.cpp",
+        "-o",
+        "rename_checkpoints_check"
+      ],
+      "returncode": 0,
+      "log": "includes_cfi_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/includes_cfi/obj_dir/rename_checkpoints_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "includes_cfi.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "-DSYNTHESIS",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/lost_history/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/lost_history/rename_checkpoints.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/rename_checkpoints_tb.cpp",
+        "-o",
+        "rename_checkpoints_check"
+      ],
+      "returncode": 0,
+      "log": "lost_history_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/lost_history/obj_dir/rename_checkpoints_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "lost_history.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "-DSYNTHESIS",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/wrong_snapshot/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/wrong_snapshot/rename_checkpoints.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/rename_checkpoints_tb.cpp",
+        "-o",
+        "rename_checkpoints_check"
+      ],
+      "returncode": 0,
+      "log": "wrong_snapshot_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/wrong_snapshot/obj_dir/rename_checkpoints_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "wrong_snapshot.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "-DSYNTHESIS",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/numeric_slot_age/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/numeric_slot_age/rename_checkpoints.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/rename_checkpoints_tb.cpp",
+        "-o",
+        "rename_checkpoints_check"
+      ],
+      "returncode": 0,
+      "log": "numeric_slot_age_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/numeric_slot_age/obj_dir/rename_checkpoints_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "numeric_slot_age.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "-DSYNTHESIS",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/recover_accumulates/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/recover_accumulates/rename_checkpoints.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/rename_checkpoints_tb.cpp",
+        "-o",
+        "rename_checkpoints_check"
+      ],
+      "returncode": 0,
+      "log": "recover_accumulates_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/recover_accumulates/obj_dir/rename_checkpoints_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "recover_accumulates.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "-DSYNTHESIS",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/unpruned_history/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/unpruned_history/rename_checkpoints.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/rename_checkpoints_tb.cpp",
+        "-o",
+        "rename_checkpoints_check"
+      ],
+      "returncode": 0,
+      "log": "unpruned_history_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/unpruned_history/obj_dir/rename_checkpoints_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "unpruned_history.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "-DSYNTHESIS",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/correct_kills_younger/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/correct_kills_younger/rename_checkpoints.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/rename_checkpoints_tb.cpp",
+        "-o",
+        "rename_checkpoints_check"
+      ],
+      "returncode": 0,
+      "log": "correct_kills_younger_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/correct_kills_younger/obj_dir/rename_checkpoints_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "correct_kills_younger.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "-DSYNTHESIS",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/missing_flush/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/missing_flush/rename_checkpoints.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/rename_checkpoints_tb.cpp",
+        "-o",
+        "rename_checkpoints_check"
+      ],
+      "returncode": 0,
+      "log": "missing_flush_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/missing_flush/obj_dir/rename_checkpoints_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "missing_flush.log"
+    },
+    {
+      "command": [
+        "verilator",
+        "--cc",
+        "--exe",
+        "--build",
+        "--build-jobs",
+        "2",
+        "--Wall",
+        "--assert",
+        "--top-module",
+        "rename_checkpoints",
+        "-DSYNTHESIS",
+        "--Mdir",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/self_ancestor/obj_dir",
+        "-CFLAGS",
+        "-std=c++17 -Wall -Wextra -Werror -I/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/self_ancestor/rename_checkpoints.sv",
+        "/home/huy/projects/spec_ooo_riscv/verif/unit/rename_checkpoints_tb.cpp",
+        "-o",
+        "rename_checkpoints_check"
+      ],
+      "returncode": 0,
+      "log": "self_ancestor_build.log"
+    },
+    {
+      "command": [
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/mutations/self_ancestor/obj_dir/rename_checkpoints_check",
+        "1",
+        "0"
+      ],
+      "returncode": 1,
+      "log": "self_ancestor.log"
+    },
+    {
+      "command": [
+        "/home/huy/tools/oss-cad-suite-20260905/oss-cad-suite/bin/yosys",
+        "-s",
+        "/home/huy/projects/spec_ooo_riscv/out/rename_checkpoints/synth.ys"
+      ],
+      "returncode": 0,
+      "log": "synth.log"
+    }
+  ],
+  "artifacts_sha256": {
+    "Makefile": "3b63953d206cba51001b495e1f18b3f40d2f1f55192f85bb73e72fc49bb1d62a",
+    "config/rename_checkpoints.json": "f0c1203f3fa5ac7bc7de9f1e31487f502f301a459fedac7a81eb2f4b980dd78f",
+    "config/synthesis.lock": "6e5753a294bab89ea89d5b3454d1741c415cb6db267904fe70e70dd89d9f2a7c",
+    "config/toolchain.lock": "11fecc1b53390b04ec510790210d500198322c0ccffc04605ea9ee6994fa87c0",
+    "rtl/backend/rename_checkpoints.sv": "0fea123ef8b0e735e35ac71d439c6e23c71a5b3547c9c4f483021b617ccc6b2c",
+    "tools/run_unit.py": "b71c2dc10c44e861d3353be3733c83aba42c7f2cef2eef0c610d89a5e29a2d42",
+    "tools/unit_profiles.py": "ec6b14270b450605aae4c2d9884d1e179f1e63700956d46c40b2e4081fe072d7",
+    "verif/unit/rename_checkpoints_tb.cpp": "d69c5988cc33a4edae9cc2115dd1d871ba3fe2e04421787651d80474d8cbbeab",
+    "out/rename_checkpoints/recover_accumulates.log": "2fb5ad6a6f3b13cb4fd263c9845274ec72a495c2982d63a1c25f6b8fa62fb844",
+    "out/rename_checkpoints/negatives_duplicate_allocation.log": "3598fdb0ce7842f9f928b7fc30c4f98d704bc638e709e935acaa64a817cc36bb",
+    "out/rename_checkpoints/wrong_snapshot.log": "b65c132be292cbfecf6b7ba3636501153c0c728fd91ef65103469a6d0e677f21",
+    "out/rename_checkpoints/unpruned_history.log": "2fb5ad6a6f3b13cb4fd263c9845274ec72a495c2982d63a1c25f6b8fa62fb844",
+    "out/rename_checkpoints/self_ancestor.log": "b65c132be292cbfecf6b7ba3636501153c0c728fd91ef65103469a6d0e677f21",
+    "out/rename_checkpoints/mutations/lost_history/rename_checkpoints.sv": "90f3355cb02f83052e620d0aecbbf4efa6cd156f3631dba2764481daf9e2dc1e",
+    "out/rename_checkpoints/numeric_slot_age.log": "8b7fb1741235ae6cb80d2d669abd3be6ab8b5c77ef0497aafd0853d563cb2789",
+    "out/rename_checkpoints/mutations/recover_accumulates/rename_checkpoints.sv": "f236e4d8993d79eeb278b8bbba7c5d4c58da2fdbec35f1612620a68ea38a44ad",
+    "out/rename_checkpoints/lint.log": "2b584af15e97a50326019d30b273c542691b74d948ca8ba4d30712a508976529",
+    "out/rename_checkpoints/build.log": "8e59b040da8e2d8937a92839337de79c0202e50485a6273072f0886113a4b87e",
+    "out/rename_checkpoints/seed_1.log": "20e2b871d0e1caa1780944e25e9b77299d070b6d89507724599ba1ba8fb99626",
+    "out/rename_checkpoints/missing_flush.log": "6c11635cd8d4cfb95f2ab82dc8a2b73b728349847a742f84cabd3301cb46b511",
+    "out/rename_checkpoints/mutations/correct_kills_younger/rename_checkpoints.sv": "670180f82753a832d498c16209c936c9120e1b0b9efbc31c2b6b96c793a83bb2",
+    "out/rename_checkpoints/mutations/wrong_snapshot/rename_checkpoints.sv": "69aa8a518ea429087cc3a02a4c2b9ab7d4cae2395d4da0a832e566ca0632faa8",
+    "out/rename_checkpoints/seed_20260910.log": "2f4e5b0426b4f091b0acd8f319b706f640e083cf59b1a1d87ee19bcfc3705426",
+    "out/rename_checkpoints/negatives_map_alias.log": "2e5902f904f5dc0d472e4e0ea26f6250308c3bd9d281addc0d83366faf089567",
+    "out/rename_checkpoints/mutations/missing_flush/rename_checkpoints.sv": "9ff34ee483aa516bf5fb711a4b468cc8d922cec7f4872d6c97a74a7a8374a2d3",
+    "out/rename_checkpoints/wrong_snapshot_build.log": "a93dada68b876df0f8fadee5c87441b3f6f7cc6fa64e006907d09e4cd44e3ce9",
+    "out/rename_checkpoints/mutations/self_ancestor/rename_checkpoints.sv": "f5f5af12e82fdaeaef5b35fc562b323420d06532be2c38ca0acaa76dd5744047",
+    "out/rename_checkpoints/lost_history_build.log": "dd0922632b5a80d58a9c48f42285077992e7f5224de35fee24c96c7fb9efb0d5",
+    "out/rename_checkpoints/synth.json": "0c2207146cb474a93c5227abfe5a0d79fb47eed43f6ad59db2f26b8af47c3402",
+    "out/rename_checkpoints/mutations/unpruned_history/rename_checkpoints.sv": "0edecb3fa3444ebb9bb0b44307ae35d3c465aca7308d141b2531871a156f1736",
+    "out/rename_checkpoints/synth.log": "8204d0a6d023c477f28b38fd4eaa80e578d45e4361c674d92b27f06bf0bbbf4e",
+    "out/rename_checkpoints/synth.ys": "0b658cec43f0641de5bb66768681b0558b722e6d95225148bb12944a1a9f7a14",
+    "out/rename_checkpoints/numeric_slot_age_build.log": "7d99ffa0bd1b6df31739077f2eb285a3ba18ad2f4d55dc1e57d9b9f9d6d53ffb",
+    "out/rename_checkpoints/self_ancestor_build.log": "e2a6f88b747e703e8d953ca2e0b7dfd645af77b05baf9e934264a22ecb2d4f40",
+    "out/rename_checkpoints/negatives_invalid_resolve.log": "c93a9849ebb345400e64e733b2ff3c8869061dab2d4527a65c0b9557901ca76c",
+    "out/rename_checkpoints/unpruned_history_build.log": "7d51951f5f55880d14315f0870a219a67938d3df143c5f2b4eee0df5038c5774",
+    "out/rename_checkpoints/recover_accumulates_build.log": "ba84bec456a4c0e60a15838d61176f455813751d811966e4749bddbf783cc424",
+    "out/rename_checkpoints/negatives_stalled_allocation.log": "d4e7a940ea12bd2235031a10fadcf1f1b32c4e7a7bf21437a6b30f2f7279bed1",
+    "out/rename_checkpoints/version.log": "1d030bd780d7885e741ac2ac46359c22b6214139b55d52958a68459ad10159d4",
+    "out/rename_checkpoints/negatives_map_zero.log": "bc14fb15a40195b1653473d97a35c1670c8b93c83bd37d4be5bf92a86970f228",
+    "out/rename_checkpoints/lost_history.log": "1ab63d4ef7402c32573acb910c6ebfd73cced2601c6e8f026dd124823b08256c",
+    "out/rename_checkpoints/missing_flush_build.log": "57d73ff420ebebb7c2e0178a0dd38807fe7902fff51990e1ab6feefe80b1bb55",
+    "out/rename_checkpoints/correct_kills_younger.log": "39acfd20e1ff35b159d5b342ee5627d69d14b89264a4479c6fbfe2e444b1f114",
+    "out/rename_checkpoints/mutations/includes_cfi/rename_checkpoints.sv": "d8e2cb96a28842454e322bf101e950d64ec2e4ada5607da770b424a041facb23",
+    "out/rename_checkpoints/includes_cfi_build.log": "182eef187249090b67c716a32ab99a07ba9ac6cd1f5c59a8e00df52fa4c49eec",
+    "out/rename_checkpoints/seed_42.log": "ed402b5842f40970db7c388bd2ed98d7daaa26dd8b9153b8acf0f4a23be07434",
+    "out/rename_checkpoints/includes_cfi.log": "b65c132be292cbfecf6b7ba3636501153c0c728fd91ef65103469a6d0e677f21",
+    "out/rename_checkpoints/correct_kills_younger_build.log": "28ba285b8d00c0615c4b791c832e459f015d7280c7b46fd4635f8f9e384b9d0e",
+    "out/rename_checkpoints/mutations/numeric_slot_age/rename_checkpoints.sv": "2c8290f0b785ef339423ff90575e46a689b9d17903af4dc0b12882c8bb02c1fa",
+    "out/rename_checkpoints/negatives_zero_allocation.log": "954a8a6e1624b0519150afd325e7c118e0d5a3a23833e27b9e32dedb7016409c"
+  },
+  "archive": "evidence/rename_checkpoints/20260923T142811460137Z.tar.gz",
+  "archive_sha256": "403c08b3febbdf92228f76e5041942c2f23ab9d32444dff938700aaec1cbe020"
+}

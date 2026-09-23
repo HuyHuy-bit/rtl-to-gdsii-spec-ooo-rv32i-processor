@@ -17,6 +17,7 @@ OSS_CAD_SUITE ?= $(HOME)/tools/oss-cad-suite-20260905/oss-cad-suite
 .PHONY: issue-queue-check
 .PHONY: issue-backend-check
 .PHONY: integer-backend-check control-flow-backend-check fetch-two-wide-check fetch-execution-core-check frontend-faults-check
+.PHONY: unit-runner-check
 .PHONY: head-system-backend-check
 .PHONY: serial-retirement-check
 .PHONY: head-trap-core-check
@@ -39,55 +40,58 @@ rename-recovery-ownership-check:
 	@python3 tools/run_rename_recovery_ownership.py --suite "$(OSS_CAD_SUITE)"
 
 backend-two-wide-check:
-	@python3 tools/run_backend_two_wide.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py backend_two_wide --suite "$(OSS_CAD_SUITE)"
 
 issue-queue-check:
-	@python3 tools/run_issue_queue.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py issue_queue --suite "$(OSS_CAD_SUITE)"
 
 issue-backend-check:
-	@python3 tools/run_issue_backend.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py issue_backend --suite "$(OSS_CAD_SUITE)"
+
+unit-runner-check:
+	@python3 -m unittest -v tests/test_unit_runner.py
 
 head-system-backend-check:
-	@python3 tools/run_head_system_backend.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py head_system_backend --suite "$(OSS_CAD_SUITE)"
 
 serial-retirement-check:
-	@python3 tools/run_serial_retirement.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py serial_retirement --suite "$(OSS_CAD_SUITE)"
 
 head-trap-core-check:
-	@python3 tools/run_head_trap_core.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py head_trap_core --suite "$(OSS_CAD_SUITE)"
 
 csr-two-wide-check:
-	@python3 tools/run_csr_two_wide.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py csr_two_wide --suite "$(OSS_CAD_SUITE)"
 
 frontend-faults-check:
-	@python3 tools/run_frontend_faults.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py frontend_faults --suite "$(OSS_CAD_SUITE)"
 
 fetch-execution-core-check:
-	@python3 tools/run_fetch_execution_core.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py fetch_execution_core --suite "$(OSS_CAD_SUITE)"
 
 fetch-two-wide-check:
-	@python3 tools/run_fetch_two_wide.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py fetch_two_wide --suite "$(OSS_CAD_SUITE)"
 
 control-flow-backend-check:
-	@python3 tools/run_control_flow_backend.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py control_flow_backend --suite "$(OSS_CAD_SUITE)"
 
 integer-backend-check:
-	@python3 tools/run_integer_backend.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py integer_backend --suite "$(OSS_CAD_SUITE)"
 
 rob-two-wide-check:
-	@python3 tools/run_rob_two_wide.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py rob_two_wide --suite "$(OSS_CAD_SUITE)"
 
 rename-bundle-check:
-	@python3 tools/run_rename_bundle.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py rename_bundle --suite "$(OSS_CAD_SUITE)"
 
 rename-state-check:
-	@python3 tools/run_rename_state.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py rename_state --suite "$(OSS_CAD_SUITE)"
 
 rename-checkpoints-check:
-	@python3 tools/run_rename_checkpoints.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py rename_checkpoints --suite "$(OSS_CAD_SUITE)"
 
 rename-recovery-check:
-	@python3 tools/run_rename_recovery.py --suite "$(OSS_CAD_SUITE)"
+	@python3 tools/run_unit.py rename_recovery --suite "$(OSS_CAD_SUITE)"
 
 formal-readiness-check:
 	@python3 tools/run_formal_readiness.py --suite "$(OSS_CAD_SUITE)"
@@ -182,7 +186,7 @@ sail-differential-check:
 single-lane-synth-check:
 	@python3 tools/run_single_lane.py --synth --mutations --suite "$(OSS_CAD_SUITE)"
 
-check-fast: platform-check event-check memory-check lockstep-check act4-check prf-check a1-probe-check single-lane-check sail-log-check architectural-slice-checker-test
+check-fast: unit-runner-check platform-check event-check memory-check lockstep-check act4-check prf-check a1-probe-check single-lane-check sail-log-check architectural-slice-checker-test
 	@python3 tools/check_s0.py
 	@git diff --check
 
