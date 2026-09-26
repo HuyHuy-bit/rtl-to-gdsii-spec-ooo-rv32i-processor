@@ -1,7 +1,13 @@
 `default_nettype none
 module issue_backend (
   input wire clk_i, rst_i, flush_i, drained_i, resources_ready_i,
-  input wire [1:0] valid_i, cfi_i, solo_i,
+  input wire [1:0] valid_i, cfi_i, solo_i, queue_skip_i,
+  input wire head_read_i,
+  input wire [5:0] head_source_i,
+  input wire serial_offer_i,
+  input wire [12:0] serial_id_i,
+  input commit_event_pkg::commit_event_t serial_event_i,
+  output wire serial_accept_o,
   input wire [9:0] rs1_i, rs2_i, rd_i,
   input wire [63:0] pc_i,
   input wire [3:0] eligible_i,
@@ -47,7 +53,9 @@ module issue_backend (
   output wire [2:0] checkpoint_id_o,
   output wire [7:0] checkpoint_valid_o, checkpoint_released_o
 );
-  wire [1:0] dispatch_ready, unused_serial;
+  wire [1:0] dispatch_ready;
+  wire unused_serial_ready;
+  wire [23:0] read_address = head_read_i ? {18'd0, head_source_i} : issue_source_o;
   wire recover = flush_i || trap_accept_o;
 
   // The queue must hold the whole renamed prefix, so its credits join the allocation stall.
@@ -55,7 +63,7 @@ module issue_backend (
 
   backend_two_wide backend (
     .clk_i, .rst_i, .flush_i, .drained_i,
-    .resources_ready_i(resources_ready_i && (selected & ~dispatch_ready) == 0),
+    .resources_ready_i(resources_ready_i && (selected & ~queue_skip_i & ~dispatch_ready) == 0),
     .valid_i, .cfi_i, .solo_i, .rs1_i, .rs2_i, .rd_i, .pc_i,
     .allocate_accept_o, .allocate_id_o,
     .source1_o, .source2_o, .destination_o, .stale_o, .source_ready_o,
@@ -65,9 +73,9 @@ module issue_backend (
     .resolve_accept_o, .branch_recover_o,
     .retire_ready_i, .retire_valid_o, .retire_accept_o, .retire_rd_o,
     .retire_destination_o, .retire_stale_o, .retire_event_o,
-    .serial_offer_i(1'b0), .serial_id_i(13'd0), .serial_event_i('0), .serial_ready_o(unused_serial[0]), .serial_accept_o(unused_serial[1]),
+    .serial_offer_i, .serial_id_i, .serial_event_i, .serial_ready_o(unused_serial_ready), .serial_accept_o,
     .trap_ready_i, .trap_valid_o, .trap_accept_o, .trap_event_o,
-    .read_address_i(issue_source_o), .read_data_o, .read_ready_o,
+    .read_address_i(read_address), .read_data_o, .read_ready_o,
     .head_valid_o, .head_id_o, .head_pc_o, .occupancy_o, .identity_drain_o,
     .rat_o, .committed_o, .free_o, .ready_o,
     .checkpoint_accept_o, .checkpoint_id_o, .checkpoint_valid_o, .checkpoint_released_o
@@ -77,12 +85,12 @@ module issue_backend (
   issue_queue queue (
     .clk_i, .rst_i, .flush_i(recover), .recover_i(branch_recover_o),
     .head_slot_i(head_id_o[4:0]), .recover_slot_i(resolve_id_i[4:0]),
-    .dispatch_i(allocate_accept_o), .dispatch_ready_o(dispatch_ready), .dispatch_id_i(allocate_id_o),
+    .dispatch_i(allocate_accept_o & ~queue_skip_i), .dispatch_ready_o(dispatch_ready), .dispatch_id_i(allocate_id_o),
     .dispatch_source_i({source2_o[11:6], source1_o[11:6], source2_o[5:0], source1_o[5:0]}),
     .dispatch_ready_i(source_ready_o), .dispatch_eligible_i(eligible_i),
     .dispatch_destination_i(destination_o), .dispatch_payload_i(payload_i),
     .wb_accept_i(wb_accept_o), .wb_destination_i(wb_destination_o),
-    .port_ready_i, .issue_o, .issue_id_o, .read_address_o(issue_source_o),
+    .port_ready_i(port_ready_i & {2{!head_read_i}}), .issue_o, .issue_id_o, .read_address_o(issue_source_o),
     .issue_destination_o, .issue_payload_o, .occupancy_o(issue_occupancy_o)
   );
 

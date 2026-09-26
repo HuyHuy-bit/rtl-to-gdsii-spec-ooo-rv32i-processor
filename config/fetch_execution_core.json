@@ -19,11 +19,12 @@
     "rtl/backend/issue_backend.sv",
     "rtl/execute/alu_pipeline.sv",
     "rtl/execute/control_flow_pipeline.sv",
+    "rtl/core/head_system_dispatch.sv",
+    "rtl/core/head_system_controller.sv",
     "rtl/backend/control_flow_backend.sv",
     "rtl/frontend/fetch_two_wide.sv",
     "rtl/frontend/frontend_fault_decode.sv",
     "rtl/core/csr_two_wide.sv",
-    "rtl/core/head_trap_controller.sv",
     "rtl/core/fetch_execution_core.sv"
   ],
   "lint_config": "config/fetch_execution_core.vlt",

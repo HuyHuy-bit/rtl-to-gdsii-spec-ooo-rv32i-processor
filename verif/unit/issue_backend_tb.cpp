@@ -182,6 +182,9 @@ public:
         unsigned cp_slot = 0; while (cp_slot < 8 && (cp & (1U << cp_slot))) ++cp_slot;
         const bool create = alloc && needs_cp;
 
+        dut.queue_skip_i=0; dut.head_read_i=0; dut.head_source_i=0;
+        dut.serial_offer_i=0; dut.serial_id_i=0;
+        for (unsigned word=0;word<(EVENT_BITS+31)/32;word++) dut.serial_event_i[word]=0;
         dut.clk_i = 0; dut.rst_i = in.reset; dut.flush_i = in.flush; dut.drained_i = in.drain;
         dut.resources_ready_i = in.resources; dut.valid_i = (1U << in.count)-1; dut.cfi_i = in.cfi; dut.solo_i = in.solo;
         dut.rs1_i = in.rs1[0] | (in.rs1[1] << 5); dut.rs2_i = in.rs2[0] | (in.rs2[1] << 5);

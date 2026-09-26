@@ -23,6 +23,9 @@
     "rtl/backend/issue_backend.sv",
     "rtl/execute/alu_pipeline.sv",
     "rtl/execute/control_flow_pipeline.sv",
+    "rtl/core/csr_two_wide.sv",
+    "rtl/core/head_system_dispatch.sv",
+    "rtl/core/head_system_controller.sv",
     "rtl/backend/control_flow_backend.sv"
   ],
   "lint_config": "config/control_flow_backend.vlt",
@@ -46,5 +49,6 @@
   "drain": "drained_i is caller-coordinated global quiescence: no ROB/IQ work, held producer (including unresolved CFI), offered instructions/completions/resolution, or external holders. Exhausted 8-bit generations never silently wrap. The top checks producer_busy_o as well as the existing backend guards. No automatic drain coordinator is added.",
   "directed_cycles": 7766,
   "frontend_fault_injection": "frontend_fault_i overrides decoding on selected lanes with a resultless, source-free, destination-free, non-CFI token. A lane-zero fault ends the accepted prefix. Cause/value/original instruction/PC are captured at allocation under the ROB slot, and fault membership is overwritten on every allocation. Completion replaces the internal neutral scheduling token with a raw trap candidate (pc_after=pc_before, retired=0, no register/memory/CSR effects). Both producer ports can hold faults. Existing recovery and generation checks govern acceptance. The original execution test pins these inputs to zero; frontend_faults-check exercises insertion. Trap service is still absent.",
-  "trap_interface": "trap_ready_i accepts a raw head fault through the existing backend trap path; trap_accept_o restores committed rename state, clears ROB/IQ and flushes both execution producer holders. Caller must atomically finalize CSR/event effects and redirect fetch. This standalone execution profile drives trap_ready_i=0; integrated acceptance is verified by head_trap_core."
+  "trap_interface": "trap_ready_i accepts a raw head fault through the existing backend trap path; trap_accept_o restores committed rename state, clears ROB/IQ and flushes both execution producer holders. Caller must atomically finalize CSR/event effects and redirect fetch. This standalone execution profile drives trap_ready_i=0; integrated acceptance is verified by head_trap_core.",
+  "system_integration": "SYSTEM_SERVICE defaults to zero for this standalone integer/control-flow profile. When enabled by fetch_execution_core TRAP_SERVICE, head_system_dispatch captures accepted system ownership, excludes it from IQ and blocks younger dispatch. PRF reads use its saved source only at the matching ROB head. head_system_controller owns the sole CSR bank, serial retirement, illegal completion and final trap events. Branch resolution is withheld while a response or head fault is pending. system_core verifies this enabled path."
 }

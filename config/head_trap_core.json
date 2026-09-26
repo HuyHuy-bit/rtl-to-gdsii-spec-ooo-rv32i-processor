@@ -19,11 +19,12 @@
     "rtl/backend/issue_backend.sv",
     "rtl/execute/alu_pipeline.sv",
     "rtl/execute/control_flow_pipeline.sv",
+    "rtl/core/head_system_dispatch.sv",
+    "rtl/core/head_system_controller.sv",
     "rtl/backend/control_flow_backend.sv",
     "rtl/frontend/fetch_two_wide.sv",
     "rtl/frontend/frontend_fault_decode.sv",
     "rtl/core/csr_two_wide.sv",
-    "rtl/core/head_trap_controller.sv",
     "rtl/core/fetch_execution_core.sv"
   ],
   "lint_config": "config/fetch_execution_core.vlt",
@@ -32,10 +33,10 @@
     42,
     20260920
   ],
-  "scope": "Integrated synchronous trap acceptance for frontend faults and control-flow target faults, ordered CSR effects and mtvec redirect with committed rename recovery. No CSR/system instruction dispatch, MRET execution, LSU, interrupts, predictor/history, full architectural-suite acceptance or physical timing claim.",
-  "faults": "Raw head faults are prepared by head_trap_controller and csr_two_wide. Trap output is a separate valid/ready architectural event channel, mutually exclusive with ordinary retirement. Only trap_valid_o && trap_ready_i increments ROB order, applies CSR state, restores committed rename state, clears ROB/IQ and both producer holders, and redirects to direct mtvec. A held proposal is stable; cancellation discards it. Raw backend_fault_event_o remains diagnostic and must not be reported as an accepted event.",
+  "scope": "Regression of integrated synchronous trap acceptance, CSR effects and mtvec redirect using the shared head_system_controller. This profile exercises integer/control-flow/frontend faults only; fetched CSR/MRET execution is covered by system_core. No LSU, interrupts, full architectural-suite acceptance or physical timing claim.",
+  "faults": "Raw head faults are prepared by head_system_controller and csr_two_wide. Trap output is a separate valid/ready architectural event channel, mutually exclusive with ordinary retirement. Only trap_valid_o && trap_ready_i increments ROB order, applies CSR state, restores committed rename state, clears ROB/IQ and both producer holders, and redirects to direct mtvec. A held proposal is stable; cancellation discards it. Raw backend_fault_event_o remains diagnostic and must not be reported as an accepted event.",
   "recovery": "Reset wins. External flush_i cancels a prepared trap and supplies the restart target without resetting CSR state or architectural order. Fatal state cancels the proposal and suppresses architectural progress. With a fault at the ROB head, younger branch resolutions are withheld even while trap output is stalled. A younger branch may resolve before the older fault reaches the head; its recovery preserves older work. Accepted trap redirect has frontend capacity and takes priority over branch recovery. Offered fetch requests remain stable, and already accepted stale responses drain before target fetch.",
-  "flow": "FRONTEND_FAULTS=1 and TRAP_SERVICE=1 are the default RTL profile. Historical execution/fault-insertion gates explicitly disable TRAP_SERVICE. CSR/system instructions remain unsupported stalls; mtvec therefore remains its platform reset value 0x100 in this profile. Handler integer/branch/jump code may run and may itself fault. Trap counts do not increment minstret; ordinary retire acceptance feeds its 0/1/2 increment.",
+  "flow": "FRONTEND_FAULTS=1 and TRAP_SERVICE=1 select the shared CSR/MRET/trap controller in the production core. This regression does not dispatch CSR/MRET, so mtvec remains its reset value 0x100. The system_core profile covers CSR writes, MRET and programmable handler targets. Raw-fault and historical execution profiles disable TRAP_SERVICE.",
   "drain": "drained_i remains externally coordinated: enable_i low, no offered/accepted instruction transaction or buffered frontend token, empty backend and no held producers or other identity holders. For generation exhaustion the caller must preserve the committed restart PC, drain outstanding fetch traffic and the backend, flush buffered fetch state with external restart, then pulse drained_i while enable remains low. This top does not automate drain or silently wrap ROB generations.",
   "parameters": {
     "FRONTEND_FAULTS": 1,
