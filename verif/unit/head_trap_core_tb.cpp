@@ -4,7 +4,7 @@ static void handler(Bench& b,bool dependencies=false) {
     b.memory[64]=instruction(2,5,dependencies ? 5 : 0,0,7);
     b.memory[65]=instruction(2,6,dependencies ? 6 : 0,0,11);
     b.memory[66]=instruction(27,0,0,0,0x1000-0x108);
-    b.memory[0x1000/4]=0x10500073;
+    b.memory[0x1000/4]=0x0000000f;
 }
 static void init(Bench& b) {
     b.memory.fill(instruction(2,0,0,0,0));
@@ -127,7 +127,7 @@ int main(int argc,char** argv) {
         // Older branch recovery must discard wrong-path faults before CSR preparation.
         for (uint32_t insn:{0xffffffffU,0x00000073U,0x00100073U}) for (unsigned kind=0;kind<4;kind++) {
             b.memory.fill(instruction(2,0,0,0,0)); handler(b);
-            b.memory[0]=instruction(27,1,0,0,0x1000); b.memory[0x1000/4]=0x10500073;
+            b.memory[0]=instruction(27,1,0,0,0x1000); b.memory[0x1000/4]=0x0000000f;
             if (kind<3) b.memory[1]=insn; else b.error_address=32;
             b.reset(); const unsigned prior=b.traps;
             for (unsigned n=0;n<70;n++) {
@@ -140,7 +140,7 @@ int main(int argc,char** argv) {
             b.error_address=UINT32_MAX; b.coverage["wrong_path_"+std::to_string(kind)]++;
         }
         for (unsigned n=0;n<3;n++) {
-            program(b,rng); b.memory[0x1000/4]=0x10500073; b.reset(); b.run_to(0x1000,rng,n==0);
+            program(b,rng); b.memory[0x1000/4]=0x0000000f; b.reset(); b.run_to(0x1000,rng,n==0);
             b.coverage["normal_program"]++;
         }
         std::cout<<"HEAD TRAP CORE PASS seed="<<seed<<" cycles="<<b.cycles<<" retired="<<b.retired<<" traps="<<b.traps;

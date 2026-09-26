@@ -45,6 +45,10 @@ struct CsrModel {
             out.effects[0]=effect(0x300,(state.at(0x300)&~0x88u)|0x80u|((state.at(0x300)>>4)&8u),0x88,3);
             return out;
         }
+        if (in.instruction == 0x10500073) {
+            out.legal=true; out.next=in.pc+4;
+            return out;
+        }
         unsigned kind=(in.instruction>>12)&7, rs=(in.instruction>>15)&31, rd=(in.instruction>>7)&31;
         const auto* c=spec(in.instruction>>20);
         if ((in.instruction&127)!=0x73 || kind==0 || kind==4 || !c) return out;

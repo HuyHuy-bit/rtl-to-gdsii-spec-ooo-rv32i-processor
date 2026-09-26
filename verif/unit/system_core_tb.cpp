@@ -1,7 +1,7 @@
 #include "fetch_execution_reference.hpp"
 
 static void initialize(Bench& b) {
-    b.memory.fill(0x10500073);
+    b.memory.fill(0x0000000f);
     for (unsigned r=1;r<32;r++) b.memory[r-1]=instruction(2,r,0,0,r*7);
 }
 static void run(Bench& b,uint32_t stop,std::mt19937& rng,bool fill=false) {
@@ -50,6 +50,26 @@ int main(int argc,char** argv) {
             b.memory[at++]=csr(0xb02,2,0,17);
             b.reset(); run(b,at*4,rng,true); b.coverage["offset_"+std::to_string(offset)]++;
         }
+        for (unsigned offset=0;offset<8;offset++) for (unsigned inhibit:{0u,4u}) {
+            initialize(b); unsigned at=31;
+            b.memory[at++]=csr(0x320,5,inhibit,0);
+            while ((at+1)%8!=offset) b.memory[at++]=instruction(2,4,4,0,1);
+            b.memory[at++]=csr(0xb02,2,0,21);
+            b.memory[at++]=0x10500073;
+            b.memory[at++]=csr(0xb02,2,0,22);
+            b.memory[at++]=0x10500073;
+            b.memory[at++]=0x10500073;
+            b.memory[at++]=instruction(2,20,4,0,1);
+            b.memory[at++]=csr(0x320,5,0,0);
+            b.memory[at++]=csr(0xb02,2,0,23);
+            b.reset(); run(b,at*4,rng,true);
+            b.require(b.regs[22]-b.regs[21]==(inhibit ? 0u:2u),"WFI instret count");
+            b.coverage["wfi_offset_"+std::to_string(offset)]++;
+            b.coverage[inhibit ? "wfi_inhibited":"wfi_counted"]++;
+        }
+        initialize(b); b.memory[31]=0x10500073; b.memory[32]=csr(0xb02,2,0,10);
+        b.reset(); run(b,132,rng,true);
+        b.require(b.regs[10]==32,"WFI older work and retirement count"); b.coverage["wfi_older_work"]++;
         // A trap handler observes the fault, advances mepc and returns through the real fetch path.
         for (unsigned fault_kind=0;fault_kind<5;fault_kind++) for (unsigned offset=0;offset<8;offset++) {
             initialize(b); unsigned at=31;
@@ -80,39 +100,47 @@ int main(int argc,char** argv) {
             if (fault_kind>=3) b.coverage["environment_offset_"+std::to_string(offset)]++;
         }
         // An older unresolved branch discards the waiting wrong-path descriptor without CSR effects.
-        initialize(b); b.memory[31]=instruction(27,0,0,0,0x800-124);
-        b.memory[32]=csr(0x340,5,31,0); b.memory[0x800/4]=csr(0x340,2,0,18);
-        b.reset();
-        for (unsigned n=0;n<150;n++) { Input i; i.grant=false; b.tick(i); }
-        run(b,0x804,rng); b.require(b.regs[18]==0,"wrong-path CSR state"); b.coverage["wrong_path_system"]++;
+        for (uint32_t insn:{csr(0x340,5,31,0),0x10500073u}) {
+            initialize(b); b.memory[31]=instruction(27,0,0,0,0x800-124);
+            b.memory[32]=insn; b.memory[0x800/4]=csr(0x340,2,0,18);
+            b.reset();
+            for (unsigned n=0;n<150;n++) { Input i; i.grant=false; b.tick(i); }
+            run(b,0x804,rng); b.require(b.regs[18]==0,"wrong-path CSR state"); b.coverage[insn==0x10500073 ? "wrong_path_wfi":"wrong_path_system"]++;
+        }
         // Held serial responses cannot commit while either retirement mask blocks lane zero.
-        for (unsigned mask:{0u,2u}) {
-            initialize(b); b.memory[31]=csr(0x340,1,5,5); b.memory[32]=csr(0x340,2,0,6);
+        for (uint32_t insn:{csr(0x340,1,5,5),0x10500073u}) for (unsigned mask:{0u,2u}) {
+            initialize(b); b.memory[31]=insn; b.memory[32]=csr(0x340,2,0,6);
             b.reset(); wait_prepared(b); const auto order=b.order;
             for (unsigned n=0;n<20;n++) { Input i; i.retire=mask; b.tick(i); }
             b.require(b.order==order,"held system retired"); run(b,132,rng);
             b.coverage["hold_mask_"+std::to_string(mask)]++;
+            if (insn==0x10500073) b.coverage["wfi_hold_"+std::to_string(mask)]++;
         }
         // Cancel a prepared response, then read the CSR to prove it had no architectural effect.
-        for (unsigned reset=0;reset<2;reset++) {
-            initialize(b); b.memory[31]=csr(0x340,5,31,0); b.memory[0x800/4]=csr(0x340,2,0,19);
+        for (uint32_t insn:{csr(0x340,5,31,0),0x10500073u}) for (unsigned reset=0;reset<2;reset++) {
+            initialize(b); b.memory[31]=insn; b.memory[0x800/4]=csr(0x340,2,0,19);
+            b.memory[0x804/4]=csr(0xb02,2,0,20);
             b.reset(); wait_prepared(b);
             Input i; i.reset=reset; i.flush=!reset; i.target=0x800; b.tick(i);
             if (reset) { i={}; i.flush=true; i.target=0x800; b.tick(i); }
-            run(b,0x804,rng); b.require(b.regs[19]==0,"canceled CSR state"); b.coverage[reset ? "reset_system":"flush_system"]++;
+            run(b,0x808,rng); b.require(b.regs[19]==0,"canceled CSR state"); b.coverage[reset ? "reset_system":"flush_system"]++;
+            if (insn==0x10500073) b.coverage[reset ? "reset_wfi":"flush_wfi"]++;
         }
-        initialize(b); b.memory[31]=csr(0x340,5,31,0); b.reset(); wait_prepared(b);
-        Input bad; bad.retire=0; bad.inject_bad=true; b.tick(bad);
-        const auto before=b.order;
-        for (unsigned n=0;n<8;n++) { Input i; i.trap_ready=true; b.tick(i); }
-        b.require(b.fatal && b.order==before && !b.d.system_busy_o,"fatal cancellation"); b.coverage["fatal_system"]++;
+        for (uint32_t insn:{csr(0x340,5,31,0),0x10500073u}) {
+            initialize(b); b.memory[31]=insn; b.reset(); wait_prepared(b);
+            Input bad; bad.retire=0; bad.inject_bad=true; b.tick(bad);
+            const auto before=b.order;
+            for (unsigned n=0;n<8;n++) { Input i; i.trap_ready=true; b.tick(i); }
+            b.require(b.fatal && b.order==before && !b.d.system_busy_o,"fatal cancellation"); b.coverage["fatal_system"]++;
+            if (insn==0x10500073) b.coverage["fatal_wfi"]++;
+        }
         // MRET redirects must tolerate both offered and accepted stale instruction traffic.
         for (unsigned kind=0;kind<2;kind++) {
             b.memory.fill(instruction(2,0,0,0,0));
             b.memory[0]=instruction(0,1,0,0,0x1000); b.memory[1]=instruction(2,1,1,0,-2048);
             b.memory[2]=csr(0x341,1,1,0);
             for (unsigned n=3;n<7;n++) b.memory[n]=instruction(2,0,0,0,0);
-            b.memory[7]=0x30200073; b.memory[0x800/4]=csr(0x340,5,7,0); b.memory[0x804/4]=0x10500073;
+            b.memory[7]=0x30200073; b.memory[0x800/4]=csr(0x340,5,7,0); b.memory[0x804/4]=0x0000000f;
             b.reset(); bool ready=false;
             for (unsigned n=0;n<1500;n++) {
                 Input i; i.retire=b.system_prepared && b.system_expected.op==30 ? 0:3;
@@ -129,7 +157,7 @@ int main(int argc,char** argv) {
             initialize(b); unsigned at=31;
             for (unsigned n=0;n<400;n++) {
                 const unsigned kind=std::array<unsigned,6>{1,2,3,5,6,7}[rng()%6];
-                b.memory[at++]=csr(n%8==0 ? 0xb02:0x340,kind,rng()%16,rng()%16);
+                b.memory[at++]=n%11==0 ? 0x10500073 : csr(n%8==0 ? 0xb02:0x340,kind,rng()%16,rng()%16);
                 b.memory[at++]=instruction(2,20,1+rng()%15,0,rng()%1024);
             }
             b.memory[at++]=instruction(2,0,0,0,0);

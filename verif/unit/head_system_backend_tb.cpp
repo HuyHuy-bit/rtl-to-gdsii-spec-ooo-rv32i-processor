@@ -197,6 +197,7 @@ struct Bench {
         coverage["held_serial"]+=serial&&!serial_accept;coverage["held_illegal"]+=illegal&&!illegal_accept;coverage["held_trap"]+=trap&&!trap_accept;
         coverage["held_input_change"]+=pending&&in.noise;
         coverage["dual_retire"]+=retired==3;coverage["mret"]+=serial_accept&&saved.insn==0x30200073;
+        coverage["wfi"]+=serial_accept&&saved.insn==0x10500073;
         coverage["stale_descriptor"]+=offered&&in.stale;coverage["nonhead_descriptor"]+=offered&&!queue.empty()&&offered_id!=queue.front().id;
         coverage["cancel_pending"]+=pending&&(in.flush||in.reset||recovery);
         if (in.reset) {
@@ -250,9 +251,10 @@ int main(int argc,char** argv) {
             b.write_reg(7,0x800+n*4);b.command(csr(0x341,1,7,0));
             b.write_reg(7,n%2?8:0);b.command(csr(0x300,1,7,0));
             b.command(0x30200073,5,n%7==0?1:0);
+            b.command(0x10500073,5);
             b.command(csr(0xfff),3);b.audit();
         }
-        for(unsigned cancel:{1,2}) for(uint32_t insn:{csr(0x340,1,7,5),csr(0xfff),0x30200073u}) {
+        for(unsigned cancel:{1,2}) for(uint32_t insn:{csr(0x340,1,7,5),csr(0xfff),0x30200073u,0x10500073u}) {
             b.command(insn,3,cancel);b.audit();b.coverage["cancel_"+std::to_string(cancel)]++;
         }
         for(unsigned round=0;round<50;round++) {

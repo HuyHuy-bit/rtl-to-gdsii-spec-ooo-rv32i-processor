@@ -60,7 +60,7 @@ struct Bench : CsrModel {
             if (in.retired==1) coverage["single_retire"]++;
             if (valid && !in.ready) coverage["held"]++;
             if (commit) {
-                coverage[held.trap ? "trap" : (held.effects[0][6]==3 ? "mret" : "csr")]++;
+                coverage[held.trap ? "trap" : (held.effects[0][6]==3 ? "mret" : held.effects[0][0] ? "csr" : "wfi")]++;
                 if (!held.trap && held.effects[0][6]==1) {
                     coverage[held.read ? "csr_read" : "read_suppressed"]++;
                     if (!held.effects[0][5]) coverage["no_effective_write"]++;
@@ -115,9 +115,18 @@ int main(int argc,char** argv) {
         }
         b.coverage["address_sweep"]++;
     }
-    for (uint32_t word:{0u,0xffffffffu,0x13u,0x00000073u,0x00100073u,0x10500073u,0x10200073u,0x30004073u}) {
+    for (uint32_t word:{0u,0xffffffffu,0x13u,0x00000073u,0x00100073u,0x105000f3u,0x10508073u,0x10200073u,0x30004073u}) {
         Input in; in.instruction=word; b.command(in,2); b.coverage["unsupported_instruction"]++;
     }
+    for (unsigned inhibit:{0u,4u}) for (uint32_t pc:{0u,0x100u,0xfffffffcu}) {
+        b.write(0x320,inhibit);
+        Input in; in.instruction=0x10500073; in.pc=pc; in.source=0xffffffff;
+        b.command(in,7); b.audit();
+        b.command(in,4,true); b.audit(); b.coverage["cancel_wfi"]++;
+        b.command(in,3,false,true); b.audit(); b.coverage["reset_wfi"]++;
+    }
+    { Input in; in.instruction=0x10500073; in.trap=true; in.pc=0x804; in.cause=11;
+      b.command(in,3); b.audit(); b.coverage["trap_over_wfi"]++; }
     for (unsigned mie:{0,8}) for (unsigned cause:{0,1,2,3,4,5,6,7,11}) {
         b.write(0x300,mie); b.write(0x305,random());
         Input in; in.trap=true; in.pc=random(); in.cause=cause; in.value=cause==11 ? 0 : random();

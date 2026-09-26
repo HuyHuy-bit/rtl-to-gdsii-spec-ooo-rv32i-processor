@@ -93,6 +93,7 @@ public:
             coverage["captured"]++;
             coverage[owner.source ? "register_source":"zero_source"]++;
             if (owner.instruction==0x30200073) coverage["mret"]++;
+            else if (owner.instruction==0x10500073) coverage["wfi"]++;
             else if ((owner.instruction>>14)&1) coverage["immediate"]++;
             else coverage["register_csr"]++;
             if (owner.id>=32) coverage["generation_capture"]++;
@@ -123,8 +124,8 @@ void directed(Check& check) {
     in={}; in.valid=3; in.accept=3; check.step(in);
     in={}; in.drain=true; in.valid=3; check.step(in);
     in={}; in.recover=true; in.head=true; in.valid=3; check.step(in);
-    for (unsigned kind : {1u,2u,3u,5u,6u,7u,0u}) for (unsigned source=0;source<64;source++) {
-        const uint32_t instruction=kind ? csr(kind,source%32):0x30200073;
+    for (unsigned kind : {1u,2u,3u,5u,6u,7u,0u,8u}) for (unsigned source=0;source<64;source++) {
+        const uint32_t instruction=kind==8 ? 0x10500073:kind ? csr(kind,source%32):0x30200073;
         const unsigned tag=kind && kind<4 && source%32 ? source:0;
         check.step(capture((source*37+kind*257)%8192,tag,instruction));
         in=matching(check); check.step(in);
@@ -151,6 +152,7 @@ void negative(Check& check,const std::string& name) {
     else if (name=="allocation") { in={}; in.accept=1; }
     else if (name=="operation") { in=capture(4,3,0x13); }
     else if (name=="source") { in=capture(4,3,csr(5,3)); }
+    else if (name=="wfi-source") { in=capture(4,3,0x10500073); }
     else if (name=="retire") { check.step(capture(4,3)); in=matching(check); in.retire=true; in.serial_id=36; }
     else if (name=="drain") { check.step(capture(4,3)); in={}; in.drain=true; }
     else if (name=="recovery") { in={}; in.recover=true; }
@@ -169,8 +171,8 @@ int main(int argc,char** argv) {
             Input in;
             if (!check.busy) {
                 if (rng()%3==0) {
-                    const unsigned kind=std::array<unsigned,7>{1,2,3,5,6,7,0}[rng()%7], rs=rng()%32;
-                    in=capture(rng()%8192,kind && kind<4 && rs ? 1+rng()%63:0,kind ? csr(kind,rs):0x30200073);
+                    const unsigned kind=std::array<unsigned,8>{1,2,3,5,6,7,0,8}[rng()%8], rs=rng()%32;
+                    in=capture(rng()%8192,kind && kind<4 && rs ? 1+rng()%63:0,kind==8 ? 0x10500073:kind ? csr(kind,rs):0x30200073);
                     if (rng()%4==0) in.accept=0;
                 } else {
                     in.valid=rng()%2 ? 3:1; in.cfi=rng()%4; in.system=rng()%2 ? 2:0;

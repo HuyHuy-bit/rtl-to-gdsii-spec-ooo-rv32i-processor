@@ -90,7 +90,7 @@ module csr_two_wide (
     operand = decoded.funct3[2] ? {27'd0, decoded.zimm}
       : (decoded.rs1 == 0 ? 32'd0 : source_i);
     write_query = decoded.funct3[1:0] == 1 || decoded.zimm != 0;
-    legal = trap_i || decoded.op == OP_MRET
+    legal = trap_i || decoded.op inside {OP_MRET, OP_WFI}
       || (decoded.op == OP_CSR && found && !(write_query && READ_ONLY[query_index]));
     read_query = !trap_i && legal && decoded.op == OP_CSR
       && !(decoded.funct3[1:0] == 1 && decoded.rd == 0);
@@ -116,6 +116,8 @@ module csr_two_wide (
       next_pc = mepc_o;
       proposal[0] = effect(CSR_MSTATUS,
         (csr_q[I_MSTATUS] & ~32'h88) | 32'h80 | {28'd0, csr_q[I_MSTATUS][7], 3'd0}, CSR_MSTATUS_WRITE_MASK, CSR_MASK_MRET);
+    end else if (decoded.op == OP_WFI) begin
+      next_pc = pc_i + 32'd4;
     end else if (decoded.op == OP_CSR && legal) begin
       next_pc = pc_i + 32'd4;
       proposal[0] = effect(decoded.csr, write_query ? new_value : old_value,

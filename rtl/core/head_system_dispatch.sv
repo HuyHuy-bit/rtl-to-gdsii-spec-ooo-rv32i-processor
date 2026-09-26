@@ -64,7 +64,7 @@ module head_system_dispatch (
     assert ((allocate_accept_i & ~dispatch_valid_o) == 0 && allocate_accept_i != 2'b10)
       else $fatal(1, "SYSTEM_DISPATCH_ALLOCATION");
     assert (!capture || (!cfi0_i && allocate_accept_i == 1
-        && (instruction_i[31:0] == 32'h30200073 || (instruction_i[6:0] == 7'h73
+        && (instruction_i[31:0] inside {32'h30200073, 32'h10500073} || (instruction_i[6:0] == 7'h73
         && instruction_i[14:12] inside {3'd1, 3'd2, 3'd3, 3'd5, 3'd6, 3'd7}))))
       else $fatal(1, "SYSTEM_DISPATCH_OPERATION");
     assert (!capture || (!(instruction_i[31:0] == 32'h30200073 || instruction_i[14]
