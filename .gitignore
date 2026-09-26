@@ -3,6 +3,7 @@
 /verif/reference/
 
 # Generated output
+/evidence/
 /out/
 **/obj_dir*/
 **/tests/*.hex

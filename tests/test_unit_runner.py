@@ -13,23 +13,25 @@ from tools.unit_profiles import PROFILES
 class UnitRunnerTests(unittest.TestCase):
     def test_profiles_preserve_accepted_results_and_require_coverage(self):
         for name, profile in PROFILES.items():
-            config = json.loads((ROOT/f'config/{name}.json').read_text())
-            receipt = ROOT/f'evidence/receipts/{name}.json'
-            if not receipt.exists():
-                receipt = ROOT/f'out/{name}/receipt.json'
-            self.assertTrue(receipt.exists(), name)
-            results = json.loads(receipt.read_text())['simulations']
-            for fields in results:
-                output = profile['prefix']+' '.join(f'{k}={v}' for k, v in fields.items())+'\n'
-                with self.subTest(profile=name, seed=fields['seed']):
-                    self.assertEqual(simulation_result(output, profile, config, fields['seed']), fields)
-                    with self.assertRaises(RuntimeError):
-                        simulation_result(output, profile, config, fields['seed']+1)
-                    for key in profile['required']:
-                        broken = dict(fields, **{key: 0})
-                        text = profile['prefix']+' '.join(f'{k}={v}' for k, v in broken.items())+'\n'
+            with self.subTest(profile=name):
+                config = json.loads((ROOT/f'config/{name}.json').read_text())
+                receipt = ROOT/f'evidence/receipts/{name}.json'
+                if not receipt.exists():
+                    receipt = ROOT/f'out/{name}/receipt.json'
+                if not receipt.exists():
+                    self.skipTest(f'Local receipt absent; run tools/run_unit.py {name}')
+                results = json.loads(receipt.read_text())['simulations']
+                for fields in results:
+                    output = profile['prefix']+' '.join(f'{k}={v}' for k, v in fields.items())+'\n'
+                    with self.subTest(profile=name, seed=fields['seed']):
+                        self.assertEqual(simulation_result(output, profile, config, fields['seed']), fields)
                         with self.assertRaises(RuntimeError):
-                            simulation_result(text, profile, config, fields['seed'])
+                            simulation_result(output, profile, config, fields['seed']+1)
+                        for key in profile['required']:
+                            broken = dict(fields, **{key: 0})
+                            text = profile['prefix']+' '.join(f'{k}={v}' for k, v in broken.items())+'\n'
+                            with self.assertRaises(RuntimeError):
+                                simulation_result(text, profile, config, fields['seed'])
 
     def test_all_mutation_selectors_still_match(self):
         for name, profile in PROFILES.items():

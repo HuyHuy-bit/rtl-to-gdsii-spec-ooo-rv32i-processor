@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "profile": "load_store_address_preparation",
+  "sources": [
+    "rtl/generated/platform_pkg.sv",
+    "rtl/core/single_lane_pkg.sv",
+    "rtl/frontend/decode_single.sv",
+    "rtl/execute/execute_single.sv",
+    "rtl/execute/load_store_prepare.sv"
+  ],
+  "lint_config": "config/fetch_execution_core.vlt",
+  "seeds": [
+    1,
+    42,
+    20260926
+  ],
+  "random_cycles_per_seed": 20000,
+  "scope": "Standalone one-entry load/store address and attribute preparation. No connection to the production IQ/ROB, data bus, LSQ, forwarding, load-return extension or store retirement; no full-core memory acceptance or physical timing claim.",
+  "handshake": "launch_i is an accepted launch, qualified by ready_o. A registered descriptor holds until take_i; accepted take plus launch replaces it without a bubble. Reset/full flush suppress ready and valid immediately and discard the holder. All descriptor outputs are zero while invalid. Selective recovery must qualify flush against the held full ROB identity externally.",
+  "decode": "Caller supplies only legal LB/LH/LW/LBU/LHU/SB/SH/SW instructions and an aligned PC. The shared decode and execution blocks compute RV32 base plus signed immediate modulo 2^32, natural-alignment faults before PMA access faults, and mtval=effective address. x0 input payloads are forced to zero, and loads consume no second source. The pinned platform regions have naturally aligned boundaries for all supported sizes; this stage does not add arbitrary split-region accesses.",
+  "descriptor": "Preserve full 13-bit ROB generation/slot identity, original instruction/PC, architectural operands, effective byte address, size (0 byte, 1 halfword, 2 word), store and unsigned-load flags. byte_mask_o indexes bytes of the containing aligned 32-bit word. Store data is shifted into those word lanes and masked; loads and all faults have zero write_data. Faults have zero byte mask and uncached flag. These fields are metadata, not a valid memory request or a retirement event.",
+  "ordering": "Successful cacheable idempotent loads have head_only=0, which is eligibility only: older-store hazards and permissions still govern issue. All stores, uncached/non-idempotent loads and faults have head_only=1. A consumer must never expose store bytes or access MMIO merely because the descriptor is accepted. Cache/LSQ, data-port ownership and atomic store/ROB retirement are separate later tasks."
+}

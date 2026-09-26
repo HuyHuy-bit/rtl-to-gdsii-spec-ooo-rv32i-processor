@@ -117,6 +117,13 @@ class UnitRun:
                     offset += f['width']
                 fields.append(f'constexpr unsigned {kind.upper()}_BITS = {offset};')
             write('fetch_memory_layout.hpp', fields)
+        if 'pma' in self.profile['headers']:
+            regions = json.loads((self.root/'config/platform.yaml').read_text())['memory']['regions']
+            rows = ['{'+', '.join([r['base']+'u', r['size']+'u',
+                    *(str(r[k]).lower() for k in ('read', 'write', 'cacheable', 'idempotent'))])+'}' for r in regions]
+            write('platform_memory_layout.hpp', ['#include <array>', '#include <cstdint>',
+                  'struct Region { uint32_t base, size; bool read, write, cacheable, idempotent; };',
+                  f'constexpr std::array<Region, {len(rows)}> REGIONS = {{{{'+', '.join(rows)+'}};'])
         if 'csr' in self.profile['headers']:
             platform = json.loads((self.root/'config/platform.yaml').read_text())
             schema = json.loads((self.root/'config/commit_event.yaml').read_text())
