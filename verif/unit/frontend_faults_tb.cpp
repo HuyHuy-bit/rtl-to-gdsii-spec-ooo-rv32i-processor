@@ -24,10 +24,11 @@ int main(int argc,char** argv) {
     try {
         unsigned seed=argc>1 ? std::stoul(argv[1]) : 1;
         std::mt19937 rng(seed); Bench b; b.fault_support=true;
-        const std::array<uint32_t,16> bad={0,0xffffffff,0x02000033,0x40001033,
+        const std::array<uint32_t,20> faults={0,0xffffffff,0x02000033,0x40001033,
             0xfff01013,0x02005013,0x00001067,0x00002063,0x00003003,0x00006003,
-            0x00003023,0x0000200f,0x00004073,0x00300073,0x0000002f,0x00000001};
-        for (unsigned offset=0;offset<8;++offset) for (uint32_t insn:bad) {
+            0x00003023,0x0000200f,0x00004073,0x00300073,0x0000002f,0x00000001,
+            0x000000f3,0x00108073,0x00000073,0x00100073};
+        for (unsigned offset=0;offset<8;++offset) for (uint32_t insn:faults) {
             init(b); unsigned at=32+offset;
             for (unsigned n=31;n<at;++n) b.memory[n]=instruction(2,4,4,0,1);
             b.memory[at]=insn; b.memory[at+1]=instruction(2,5,5,0,9);
@@ -42,7 +43,7 @@ int main(int argc,char** argv) {
                 Input i; i.enable=false; i.flush=true; i.target=256; b.tick(i);
                 i.flush=false; i.drain=true; b.tick(i);
             }
-            b.memory[64]=instruction(2,1,1,0,1); b.memory[65]=bad[iteration%bad.size()];
+            b.memory[64]=instruction(2,1,1,0,1); b.memory[65]=faults[iteration%faults.size()];
             restart(b,256); until_fault(b,rng);
             b.require(b.pc==260,"reused fault slot PC");
         }
@@ -58,10 +59,10 @@ int main(int argc,char** argv) {
         }
         b.error_address=UINT32_MAX;
         // An older unresolved jump can squash queued, held and completed younger faults.
-        for (unsigned kind=0;kind<3;++kind) {
+        for (uint32_t insn:{0xffffffffU,0x00000073U,0x00100073U}) for (unsigned kind=0;kind<4;++kind) {
             b.memory.fill(instruction(2,0,0,0,0));
             b.memory[0]=instruction(27,1,0,0,0x1000); b.memory[0x1000/4]=0x10500073;
-            if (kind<2) b.memory[1]=0xffffffff;
+            if (kind<3) b.memory[1]=insn;
             else b.error_address=32;
             b.reset();
             for (unsigned n=0;n<70;++n) {
@@ -77,12 +78,14 @@ int main(int argc,char** argv) {
             b.error_address=UINT32_MAX;
         }
         // A lane-zero fault ends the bundle even when the tail is legal but not implemented.
-        b.memory.fill(0x10500073); b.memory[0]=0xffffffff; b.reset(); until_fault(b,rng);
-        b.require(b.d.occupancy_o==1,"lane-zero fault admitted tail");
-        b.coverage["fault_prefix"]++;
+        for (uint32_t insn:{0xffffffffU,0x00000073U,0x00100073U}) {
+            b.memory.fill(0x10500073); b.memory[0]=insn; b.reset(); until_fault(b,rng);
+            b.require(b.d.occupancy_o==1,"lane-zero fault admitted tail");
+            b.coverage["fault_prefix"]++;
+        }
         // Legal deferred classes must stall rather than be relabeled as illegal encodings.
         for (uint32_t legal:{0x00002083U,0x00102023U,0x300010f3U,0x0000000fU,0x0000100fU,
-                            0x00000073U,0x00100073U,0x30200073U,0x10500073U}) {
+                            0x30200073U,0x10500073U}) {
             b.memory.fill(0x10500073); b.memory[0]=legal; b.reset();
             for (unsigned n=0;n<20;++n) b.tick();
             b.require(b.d.unsupported_o && !b.d.backend_fault_o && b.d.occupancy_o==0,"legal deferred instruction misclassified");

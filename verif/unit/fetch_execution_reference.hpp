@@ -58,6 +58,9 @@ struct Bench {
         const unsigned kind=(insn>>12)&7;
         return insn==0x30200073 || ((insn&127)==0x73 && kind!=0 && kind!=4);
     }
+    static bool decoded_fault(uint32_t insn) {
+        return illegal(insn) || insn==0x00000073 || insn==0x00100073;
+    }
     static void effects(Event& event,const Reply& reply) {
         for (unsigned n=0;n<4;n++) for (unsigned f=0;f<7;f++)
             put(event,n*CSR_EFFECT_BITS+FIELD_OFFSET[f],FIELD_WIDTH[f],reply.effects[n][f]);
@@ -85,7 +88,7 @@ struct Bench {
         return e;
     }
     Expected expected() {
-        if (fault_support && (pc%4 || pc>=65536 || (pc&~31U)==error_address || illegal(memory[pc/4]))) {
+        if (fault_support && (pc%4 || pc>=65536 || (pc&~31U)==error_address || decoded_fault(memory[pc/4]))) {
             const bool fetch=pc%4 || pc>=65536 || (pc&~31U)==error_address;
             const uint32_t insn=fetch ? 0 : memory[pc/4];
             Expected e{}; e.fault=true; e.next_pc=pc;
@@ -93,8 +96,8 @@ struct Bench {
             put(e.event,INSTRUCTION_OFFSET,32,insn); put(e.event,PRIVILEGE_OFFSET,2,3);
             put(e.event,PC_BEFORE_OFFSET,32,pc); put(e.event,PC_AFTER_OFFSET,32,pc);
             put(e.event,TRAP_OFFSET,1,1);
-            put(e.event,TRAP_CAUSE_OFFSET,32,fetch ? (pc%4 ? 0 : 1) : 2);
-            put(e.event,TRAP_VALUE_OFFSET,32,fetch ? pc : insn);
+            put(e.event,TRAP_CAUSE_OFFSET,32,fetch ? (pc%4 ? 0 : 1) : insn==0x73 ? 11 : insn==0x100073 ? 3 : 2);
+            put(e.event,TRAP_VALUE_OFFSET,32,fetch ? pc : insn==0x73 ? 0 : insn==0x100073 ? pc : insn);
             return e;
         }
         require(pc<65536 && pc%4==0,"reference executable PC");
@@ -217,7 +220,7 @@ struct Bench {
                 if (held) coverage["redirect_request_stall"]++;
             }
             require(d.dispatch_o!=2 && !(d.dispatch_o & ~d.fetch_valid_o),"dispatch prefix");
-            if (fault_support && d.dispatch_o && (d.fetch_fault_o || illegal(uint32_t(d.fetch_instruction_o))))
+            if (fault_support && d.dispatch_o && (d.fetch_fault_o || decoded_fault(uint32_t(d.fetch_instruction_o))))
                 require(d.dispatch_o==1,"lane-zero fault did not end prefix");
             if (d.dispatch_o==3) coverage["dual_dispatch"]++;
             if (d.fetch_valid_o && !d.dispatch_o && !d.fetch_fault_o && !d.unsupported_o) coverage["dispatch_stall"]++;
@@ -235,10 +238,14 @@ struct Bench {
                 uint32_t address=uint32_t(d.fetch_pc_o>>(32*lane));
                 require(address<65536 && address%4==0,"fetched executable PC");
                 require(uint32_t(d.fetch_instruction_o>>(32*lane))==memory[address/4],"fetched word");
-                bool unsupported=operation(memory[address/4])<0 && !(fault_support && illegal(memory[address/4]))
+                bool unsupported=operation(memory[address/4])<0 && !(fault_support && decoded_fault(memory[address/4]))
                     && !(system_service && system_instruction(memory[address/4]));
                 if (fault_support && illegal(memory[address/4]) && (d.dispatch_o&(1U<<lane)))
                     coverage[lane ? "illegal_lane1" : "illegal_lane0"]++;
+                if (fault_support && (d.dispatch_o&(1U<<lane))) {
+                    if (memory[address/4]==0x73) coverage[lane ? "ecall_lane1":"ecall_lane0"]++;
+                    if (memory[address/4]==0x100073) coverage[lane ? "ebreak_lane1":"ebreak_lane0"]++;
+                }
                 require(bool(d.unsupported_o&(1U<<lane))==unsupported,"unsupported lane indication");
                 if (unsupported) coverage["unsupported"]++;
             }

@@ -51,12 +51,15 @@ int main(int argc,char** argv) {
             b.reset(); run(b,at*4,rng,true); b.coverage["offset_"+std::to_string(offset)]++;
         }
         // A trap handler observes the fault, advances mepc and returns through the real fetch path.
-        for (unsigned illegal_kind=0;illegal_kind<3;illegal_kind++) {
+        for (unsigned fault_kind=0;fault_kind<5;fault_kind++) for (unsigned offset=0;offset<8;offset++) {
             initialize(b); unsigned at=31;
             b.memory[at++]=instruction(2,1,0,0,0x400);
             b.memory[at++]=csr(0x305,1,1,0);
             b.memory[at++]=csr(0x300,5,8,0);
-            b.memory[at++]=illegal_kind==0 ? csr(0xfff,2,5,6) : illegal_kind==1 ? csr(0xf11,1,5,6) : 0xffffffff;
+            while (at%8!=offset) b.memory[at++]=instruction(2,4,4,0,1);
+            const unsigned fault_pc=at*4;
+            b.memory[at++]=fault_kind==0 ? csr(0xfff,2,5,6) : fault_kind==1 ? csr(0xf11,1,5,6) :
+                fault_kind==2 ? 0xffffffff : fault_kind==3 ? 0x00000073 : 0x00100073;
             b.memory[at++]=csr(0x340,5,19,7);
             b.memory[at++]=csr(0x300,2,0,8);
             b.memory[at++]=csr(0xb02,2,0,9);
@@ -69,7 +72,12 @@ int main(int argc,char** argv) {
             b.memory[h++]=0x30200073;
             b.memory[h]=csr(0x340,5,31,0);
             const unsigned prior=b.traps; b.reset(); run(b,at*4,rng);
-            b.require(b.traps==prior+1,"trap/return count"); b.coverage["trap_return_"+std::to_string(illegal_kind)]++;
+            b.require(b.traps==prior+1,"trap/return count");
+            b.require(b.regs[10]==(fault_kind<3 ? 2u:fault_kind==3 ? 11u:3u),"handler mcause");
+            b.require(b.regs[11]==(fault_kind<3 ? b.memory[fault_pc/4]:fault_kind==3 ? 0:fault_pc),"handler mtval");
+            b.require(b.regs[12]==fault_pc+4,"handler mepc increment");
+            b.coverage["trap_return_"+std::to_string(fault_kind)]++;
+            if (fault_kind>=3) b.coverage["environment_offset_"+std::to_string(offset)]++;
         }
         // An older unresolved branch discards the waiting wrong-path descriptor without CSR effects.
         initialize(b); b.memory[31]=instruction(27,0,0,0,0x800-124);

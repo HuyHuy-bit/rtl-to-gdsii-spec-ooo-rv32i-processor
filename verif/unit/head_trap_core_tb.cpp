@@ -39,10 +39,11 @@ int main(int argc,char** argv) {
     try {
         const unsigned seed=argc>1 ? std::stoul(argv[1]) : 1;
         std::mt19937 rng(seed); Bench b; b.fault_support=true; b.trap_service=true;
-        const std::array<uint32_t,16> bad={0,0xffffffff,0x02000033,0x40001033,
+        const std::array<uint32_t,20> faults={0,0xffffffff,0x02000033,0x40001033,
             0xfff01013,0x02005013,0x00001067,0x00002063,0x00003003,0x00006003,
-            0x00003023,0x0000200f,0x00004073,0x00300073,0x0000002f,0x00000001};
-        for (unsigned offset=0;offset<8;offset++) for (uint32_t insn:bad) {
+            0x00003023,0x0000200f,0x00004073,0x00300073,0x0000002f,0x00000001,
+            0x000000f3,0x00108073,0x00000073,0x00100073};
+        for (unsigned offset=0;offset<8;offset++) for (uint32_t insn:faults) {
             init(b); const unsigned at=32+offset; b.memory[at]=insn;
             b.memory[at+1]=instruction(2,5,5,0,99); b.memory[at+2]=instruction(2,6,6,0,123);
             b.reset(); offer(b,rng); b.require(b.pc==at*4,"older instructions lost");
@@ -52,7 +53,7 @@ int main(int argc,char** argv) {
         // Repeated accepted traps preserve committed registers, CSR history and event order.
         for (unsigned n=0;n<320;n++) {
             if (n%100==0) drain(b);
-            b.memory[128]=instruction(2,5,5,0,1); b.memory[129]=bad[n%bad.size()];
+            b.memory[128]=instruction(2,5,5,0,1); b.memory[129]=faults[n%faults.size()];
             restart(b,512); offer(b,rng); accept(b); b.run_to(0x1000,rng);
             b.coverage["slot_reuse"]++;
         }
@@ -94,8 +95,8 @@ int main(int argc,char** argv) {
             b.run_to(0x1000,rng); b.coverage[kind ? "trap_pending_fetch" : "trap_offered_fetch"]++;
         }
         // External recovery and reset cancel a prepared trap before its state transition.
-        for (unsigned reset=0;reset<2;reset++) {
-            init(b); b.memory[32]=0xffffffff; b.reset(); offer(b,rng);
+        for (uint32_t insn:{0xffffffffU,0x00000073U,0x00100073U}) for (unsigned reset=0;reset<2;reset++) {
+            init(b); b.memory[32]=insn; b.reset(); offer(b,rng);
             const unsigned before=b.traps;
             Input i; i.trap_ready=true; i.flush=!reset; i.target=0x1000; i.reset=reset; b.tick(i);
             b.require(b.traps==before && !b.d.trap_valid_o,"canceled trap accepted");
@@ -104,11 +105,13 @@ int main(int argc,char** argv) {
             accept(b); b.run_to(0x1000,rng); b.coverage[reset ? "reset_prepared" : "flush_prepared"]++;
         }
         // Malformed memory traffic cancels a held proposal and prevents architectural progress.
-        init(b); b.memory[32]=0xffffffff; b.reset(); offer(b,rng);
-        const unsigned before=b.traps; Input corrupt; corrupt.inject_bad=true; b.tick(corrupt);
-        for (unsigned n=0;n<5;n++) { Input i; i.trap_ready=true; b.tick(i); }
-        b.require(b.traps==before && b.d.fatal_o && !b.d.trap_valid_o,"fatal accepted prepared trap");
-        b.coverage["fatal_prepared"]++;
+        for (uint32_t insn:{0xffffffffU,0x00000073U,0x00100073U}) {
+            init(b); b.memory[32]=insn; b.reset(); offer(b,rng);
+            const unsigned before=b.traps; Input corrupt; corrupt.inject_bad=true; b.tick(corrupt);
+            for (unsigned n=0;n<5;n++) { Input i; i.trap_ready=true; b.tick(i); }
+            b.require(b.traps==before && b.d.fatal_o && !b.d.trap_valid_o,"fatal accepted prepared trap");
+            b.coverage["fatal_prepared"]++;
+        }
         // A fault in the handler produces another ordered trap with updated old CSR values.
         init(b); b.memory[32]=0xffffffff; b.memory[65]=0; b.reset();
         for (unsigned n=0;n<8;n++) { offer(b,rng); accept(b); }
@@ -122,10 +125,10 @@ int main(int argc,char** argv) {
         b.require(b.traps==first+12,"ready-before-valid trap progress");
         b.coverage["ready_before_fault"]++;
         // Older branch recovery must discard wrong-path faults before CSR preparation.
-        for (unsigned kind=0;kind<3;kind++) {
+        for (uint32_t insn:{0xffffffffU,0x00000073U,0x00100073U}) for (unsigned kind=0;kind<4;kind++) {
             b.memory.fill(instruction(2,0,0,0,0)); handler(b);
             b.memory[0]=instruction(27,1,0,0,0x1000); b.memory[0x1000/4]=0x10500073;
-            if (kind<2) b.memory[1]=0xffffffff; else b.error_address=32;
+            if (kind<3) b.memory[1]=insn; else b.error_address=32;
             b.reset(); const unsigned prior=b.traps;
             for (unsigned n=0;n<70;n++) {
                 Input i; i.grant=false; i.trap_ready=true;
